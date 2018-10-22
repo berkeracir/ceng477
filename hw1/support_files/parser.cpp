@@ -330,3 +330,58 @@ std::ostream& parser::operator<<(std::ostream &o,const parser::Scene &scene) {
 
     return o;
 }
+
+parser::Vec3f parser::Vec3f::operator+(const parser::Vec3f &rhs) {
+    return parser::Vec3f {this->x + rhs.x, this->y + rhs.y, this->z + rhs.z};
+}
+
+parser::Vec3f parser::Vec3f::operator-(const parser::Vec3f &rhs) {
+    return parser::Vec3f {this->x - rhs.x, this->y - rhs.y, this->z - rhs.z};
+}
+
+template <typename T>
+parser::Vec3f parser::Vec3f::operator*(const T &rhs) {
+    return parser::Vec3f {this->x * (float) rhs, this->y * (float) rhs, this->z * (float) rhs};
+}
+template parser::Vec3f parser::Vec3f::operator*<int>(const int &);
+template parser::Vec3f parser::Vec3f::operator*<float>(const float &);
+template parser::Vec3f parser::Vec3f::operator*<double>(const double &);
+
+template <typename T>
+parser::Vec3f parser::operator*(const T &lhs, const parser::Vec3f &rhs) {
+    return parser::Vec3f {rhs.x * (float) lhs, rhs.y * (float) lhs, rhs.z * (float) lhs};
+}
+template parser::Vec3f parser::operator*<int>(const int &, const parser::Vec3f &);
+template parser::Vec3f parser::operator*<float>(const float &, const parser::Vec3f &);
+template parser::Vec3f parser::operator*<double>(const double &, const parser::Vec3f &);
+
+parser::Vec3f parser::Vec3f::operator-() {
+    return parser::Vec3f {-this->x, -this->y, -this->z};
+}
+
+
+// Overload += and -= operator
+parser::Vec3f& parser::Vec3f::operator+=(const Vec3f &rhs) {
+    this->x = this->x + rhs.x;
+    this->y = this->y + rhs.y;
+    this->z = this->z + rhs.z;
+    return *this;
+}
+parser::Vec3f& parser::Vec3f::operator-=(const Vec3f &rhs) {
+    this->x = this->x - rhs.x;
+    this->y = this->y - rhs.y;
+    this->z = this->z - rhs.z;
+    return *this;
+}
+
+// Overload * operator
+template <typename T>
+parser::Vec3f& parser::Vec3f::operator*=(const T &rhs) {
+    this->x = this->x * (float) rhs;
+    this->y = this->y * (float) rhs;
+    this->z = this->z * (float) rhs;
+    return *this;
+}
+template parser::Vec3f& parser::Vec3f::operator*=<int>(const int &);
+template parser::Vec3f& parser::Vec3f::operator*=<float>(const float &);
+template parser::Vec3f& parser::Vec3f::operator*=<double>(const double &);

@@ -12,6 +12,25 @@ namespace parser
     struct Vec3f
     {
         float x, y, z;
+
+        // Overload + and - operators for binary addition and subtraction operations
+        Vec3f operator+(const Vec3f &rhs);
+        Vec3f operator-(const Vec3f &rhs);
+
+        // Overload * operator for scalar multiplication
+        template <typename T>
+        Vec3f operator*(const T &rhs);
+
+        // Overload - operator for unary minus operation
+        Vec3f operator-();
+
+        // Overload += and -= operator
+        Vec3f& operator+=(const Vec3f &rhs);
+        Vec3f& operator-=(const Vec3f &rhs);
+
+        // Overload * operator
+        template <typename T>
+        Vec3f& operator*=(const T &rhs);
     };
 
     struct Vec3i
@@ -95,6 +114,8 @@ namespace parser
         void loadFromXml(const std::string& filepath);
     };
 
+    // Generic print function for vector<typename T>
+    // typename T must be printable with cout << operator
     template <typename T>
     void printVector(const std::vector<T> &vec);
 
@@ -111,6 +132,10 @@ namespace parser
     std::ostream& operator<<(std::ostream &o,const parser::Triangle &triangle);
     std::ostream& operator<<(std::ostream &o,const parser::Sphere &sphere);
     std::ostream& operator<<(std::ostream &o,const parser::Scene &scene);
+
+    // Overload * operator for scalar multiplication
+    template <typename T>
+    Vec3f operator*(const T &lhs, const Vec3f &rhs);
 }
 
 #endif
