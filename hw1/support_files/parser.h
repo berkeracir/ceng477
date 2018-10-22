@@ -31,6 +31,9 @@ namespace parser
         // Overload * operator
         template <typename T>
         Vec3f& operator*=(const T &rhs);
+
+        // Overload = operator
+        Vec3f& operator=(const Vec3f& rhs);
     };
 
     struct Vec3i
@@ -132,6 +135,10 @@ namespace parser
     std::ostream& operator<<(std::ostream &o,const parser::Triangle &triangle);
     std::ostream& operator<<(std::ostream &o,const parser::Sphere &sphere);
     std::ostream& operator<<(std::ostream &o,const parser::Scene &scene);
+
+    // Overload + and - operators for binary addition and subtraction operations
+    Vec3f operator+(const Vec3f &lhs, const Vec3f &rhs);
+    Vec3f operator-(const Vec3f &lhs, const Vec3f &rhs);
 
     // Overload * operator for scalar multiplication
     template <typename T>
