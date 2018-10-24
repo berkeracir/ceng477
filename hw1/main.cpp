@@ -2,6 +2,7 @@
 #include "support_files/ppm.h"
 #include "support_files/ray_trace.h"
 #include <iostream>
+#include <string>
 
 typedef unsigned char RGB[3];
 
@@ -66,8 +67,9 @@ int main(int argc, char* argv[]) {
             // Ray Form: r(t) = o + t.d
             // where d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v)
             Vec3f d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v);
+            float t = ray_sphere_intersection(e, d, c, radius);
 
-            if (ray_sphere_intersection(e, d, c, radius)) {
+            if (t > 0) {
                 image[image_index++] = 255;
                 image[image_index++] = 255;
                 image[image_index++] = 255;
@@ -80,7 +82,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    write_ppm(argv[2], image, nx, ny);
+    write_ppm(camera.image_name.c_str(), image, nx, ny);
 
     /*
     const RGB BAR_COLOR[8] =
