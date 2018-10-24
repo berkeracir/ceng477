@@ -4,6 +4,14 @@
 #include "parser.h"
 #include <vector>
 
+// Ray struct that represents:
+//  r(t) = o + t.d
+struct Ray {
+    parser::Vec3f o;
+    parser::Vec3f d;
+    float t;
+};
+
 // Vector (parser::Vec3f) magnitude
 // |(x,y,z)| = sqrt(x*x+y*y+z*z)
 float vector_magnitude(const parser::Vec3f &vec);
