@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
         Vec3f v = camera.up; // Camera Up vector (v)
         Vec3f w = -camera.gaze; // Camera Opposite Gaze vector (w)
         Vec3f u = vector_cross(v, w); // Camera Right vector (u)
-        Vec3f m = e - w * d; // Vector to middle of image plane from camera
+        Vec3f m = (-w) * d; // Vector to middle of image plane from camera
         Vec3f q = m + l*u + t*v; // Vector to top left corner of image plane from camera
 
         float pw = (r-l)/(float) nx; // Pixel width of each pixel
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
 
         // Iterate through spheres
         for (std::size_t sid = 0; sid < scene.spheres.size(); sid++) {
-            std::cout << "Sphere-" << sid+1 << std::endl << scene.spheres[sid];
+            std::cout << "Sphere-" << sid+1 << std::endl << scene.spheres[sid] << std::endl;
             
             Vec3f c = scene.vertex_data[scene.spheres[sid].center_vertex_id-1];
             float radius = scene.spheres[sid].radius;
@@ -68,9 +68,38 @@ int main(int argc, char* argv[]) {
                     float t = ray_sphere_intersection(e, d, c, radius);
 
                     if (t > 0) {
-                        image[image_index++] = 2*(row+col)%256;
-                        image[image_index++] = 3*(row-col)%256;
-                        image[image_index++] = 5*(col-row)%256;
+                        image[image_index++] = 255;
+                        image[image_index++] = 0;
+                        image[image_index++] = 0;
+                    }
+                    else
+                        image_index += 3;
+                }
+            }
+        }
+
+        // Iterate through triangles
+        for (std::size_t tid = 0; tid < scene.triangles.size(); tid++) {
+            std::cout << "Triangle-" << tid+1 << std::endl << scene.triangles[tid] << std::endl;
+            
+            Vec3f a = scene.vertex_data[scene.triangles[tid].indices.v0_id-1];
+            Vec3f b = scene.vertex_data[scene.triangles[tid].indices.v1_id-1];
+            Vec3f c = scene.vertex_data[scene.triangles[tid].indices.v2_id-1];
+
+            unsigned int image_index = 0;
+
+            // Iterate through image plane (Width:nx, Height:ny)
+            for (int row = 0; row < ny; row++) {
+                for (int col = 0; col < nx; col++) {
+                    // Ray Form: r(t) = o + t.d
+                    // where d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v)
+                    Vec3f d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v);
+                    float t = ray_triangle_intersection(e, d, a, b, c);
+
+                    if (t > 0) {
+                        image[image_index++] = 0;
+                        image[image_index++] = 255;
+                        image[image_index++] = 0;
                     }
                     else
                         image_index += 3;
