@@ -2,7 +2,7 @@
 #include "support_files/ppm.h"
 #include "support_files/ray.h"
 #include "support_files/ray_sphere.h"
-//#include "support_files/ray_triangle.h"
+#include "support_files/ray_triangle.h"
 //#include "support_files/ray_mesh.h"
 #include <iostream>
 #include <string>
@@ -16,76 +16,100 @@ int main(int argc, char* argv[]) {
 
     scene.loadFromXml(argv[1]);
 
-    // only for first camera
-    Camera camera = scene.cameras[0];
+    // Iterate through cameras
+    for (std::size_t cid = 0; cid < scene.cameras.size(); cid++) {    // Actual Camera ID is cid+1
+        Camera camera = scene.cameras[cid];
 
-    int nx = camera.image_width;
-    int ny = camera.image_height;
+        std::cout << "Camera-" << cid+1 << std::endl << camera << std::endl;
 
-    float l = camera.near_plane.x; // Left edge of image plane
-    float r = camera.near_plane.y; // Right edge of image plane
-    float b = camera.near_plane.z; // Bottom edge of image plane
-    float t = camera.near_plane.w; // Top edge of image plane
+        int nx = camera.image_width;
+        int ny = camera.image_height;
 
-    float d = camera.near_distance;
+        float l = camera.near_plane.x; // Left edge of image plane
+        float r = camera.near_plane.y; // Right edge of image plane
+        float b = camera.near_plane.z; // Bottom edge of image plane
+        float t = camera.near_plane.w; // Top edge of image plane
 
-    //Vec3f* rays = new Vec3f [camera.image_width * camera.image_height];
-    //Vec3f* image_plane_rays = new Vec3f [nx * ny];
+        float d = camera.near_distance;
 
-    unsigned char *image = new unsigned char [nx * ny * 3];
+        unsigned char *image = new unsigned char [nx * ny * 3];
+        // Set background color to Image Plane
+        for (std::size_t i = 0; i < nx*ny*3;) {
+            image[i++] = scene.background_color.x;
+            image[i++] = scene.background_color.y;
+            image[i++] = scene.background_color.z;
+        }
 
-    RGB color_black = {0, 0, 0};
-    RGB color_white = {255, 255, 255};
+        Vec3f e = camera.position; // Camera position
+        Vec3f v = camera.up; // Camera Up vector (v)
+        Vec3f w = -camera.gaze; // Camera Opposite Gaze vector (w)
+        Vec3f u = vector_cross(v, w); // Camera Right vector (u)
+        Vec3f m = (-w) * d; // Vector to middle of image plane from camera
+        Vec3f q = m + l*u + t*v; // Vector to top left corner of image plane from camera
 
-    Vec3f e = camera.position; // Camera position
-    std::cout << "position: " << camera.position << " - " << e << std::endl;
-    Vec3f v = camera.up; // Camera Up vector (v)
-    Vec3f w = -camera.gaze; // Camera Opposite Gaze vector (w)
-    Vec3f u = vector_cross(v, w); // Camera Right vector (u)
-    std::cout << "position: " << camera.position << " - " << e << std::endl;
-    Vec3f m = e - w * d; // Vector to middle of image plane from camera
-    std::cout << "position: " << camera.position << " - " << e << std::endl;
-    Vec3f q = m + l*u + t*v; // Vector to top left corner of image plane from camera
+        float pw = (r-l)/(float) nx; // Pixel width of each pixel
+        float ph = (t-b)/(float) ny; // Pixel height of each pixel
 
-    float pw = (r-l)/(float) nx; // Pixel width of each pixel
-    float ph = (t-b)/(float) ny; // Pixel height of each pixel
+        // Iterate through spheres
+        for (std::size_t sid = 0; sid < scene.spheres.size(); sid++) {
+            std::cout << "Sphere-" << sid+1 << std::endl << scene.spheres[sid] << std::endl;
+            
+            Vec3f c = scene.vertex_data[scene.spheres[sid].center_vertex_id-1];
+            float radius = scene.spheres[sid].radius;
 
-    Vec3f c = scene.vertex_data[scene.spheres[0].center_vertex_id-1];
-    float radius = scene.spheres[0].radius;
+            unsigned int image_index = 0;
 
-    std::cout << "position: " << camera.position << " - " << e << std::endl;
-    std::cout << "up: " << camera.up << std::endl;
-    std::cout << "gaze: " << camera.gaze << std::endl;
-    std::cout << "near_plane: " << camera.near_plane.x << "," << camera.near_plane.y << "," << camera.near_plane.z << "," << camera.near_plane.w << std::endl;
-    std::cout << "near_distance: " << camera.near_distance << std::endl;
-    std::cout << "image_width: " << camera.image_width << std::endl;
-    std::cout << "image_height: " << camera.image_height << std::endl;
-    std::cout << "image_name: " << camera.image_name << std::endl;
-    std::cout << "u: " << vector_cross(camera.gaze, camera.up) << std::endl;
+            // Iterate through image plane (Width:nx, Height:ny)
+            for (int row = 0; row < ny; row++) {
+                for (int col = 0; col < nx; col++) {
+                    // Ray Form: r(t) = o + t.d
+                    // where d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v)
+                    Vec3f d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v);
+                    float t = ray_sphere_intersection(e, d, c, radius);
 
-    int image_index = 0;
-
-    for (int row = 0; row < ny; row++) {
-        for (int col = 0; col < nx; col++) {
-            // Ray Form: r(t) = o + t.d
-            // where d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v)
-            Vec3f d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v);
-            float t = ray_sphere_intersection(e, d, c, radius);
-
-            if (t > 0) {
-                image[image_index++] = 255;
-                image[image_index++] = 255;
-                image[image_index++] = 255;
-            }
-            else {
-                image[image_index++] = 0;
-                image[image_index++] = 0;
-                image[image_index++] = 0;
+                    if (t > 0) {
+                        image[image_index++] = 255;
+                        image[image_index++] = 0;
+                        image[image_index++] = 0;
+                    }
+                    else
+                        image_index += 3;
+                }
             }
         }
-    }
 
-    write_ppm(camera.image_name.c_str(), image, nx, ny);
+        // Iterate through triangles
+        for (std::size_t tid = 0; tid < scene.triangles.size(); tid++) {
+            std::cout << "Triangle-" << tid+1 << std::endl << scene.triangles[tid] << std::endl;
+            
+            Vec3f a = scene.vertex_data[scene.triangles[tid].indices.v0_id-1];
+            Vec3f b = scene.vertex_data[scene.triangles[tid].indices.v1_id-1];
+            Vec3f c = scene.vertex_data[scene.triangles[tid].indices.v2_id-1];
+
+            unsigned int image_index = 0;
+
+            // Iterate through image plane (Width:nx, Height:ny)
+            for (int row = 0; row < ny; row++) {
+                for (int col = 0; col < nx; col++) {
+                    // Ray Form: r(t) = o + t.d
+                    // where d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v)
+                    Vec3f d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v);
+                    float t = ray_triangle_intersection(e, d, a, b, c);
+
+                    if (t > 0) {
+                        image[image_index++] = 0;
+                        image[image_index++] = 255;
+                        image[image_index++] = 0;
+                    }
+                    else
+                        image_index += 3;
+                }
+            }
+        }
+
+        // Output the image_plane
+        write_ppm(camera.image_name.c_str(), image, nx, ny);
+    }
 
     /*
     const RGB BAR_COLOR[8] =
