@@ -333,18 +333,10 @@ std::ostream& parser::operator<<(std::ostream &o,const parser::Scene &scene) {
 
 parser::Vec3f parser::Vec3f::operator+(const parser::Vec3f &rhs) {
    return parser::Vec3f {this->x + rhs.x, this->y + rhs.y, this->z + rhs.z};
-    /*this->x = this->x + rhs.x;
-    this->y = this->y + rhs.y;
-    this->z = this->z + rhs.z;
-    return *this;*/
 }
 
 parser::Vec3f parser::Vec3f::operator-(const parser::Vec3f &rhs) {
     return parser::Vec3f {this->x - rhs.x, this->y - rhs.y, this->z - rhs.z};
-    /*this->x = this->x - rhs.x;
-    this->y = this->y - rhs.y;
-    this->z = this->z - rhs.z;
-    return *this;*/
 }
 
 template <typename T>
@@ -367,7 +359,6 @@ parser::Vec3f parser::Vec3f::operator-() {
     return parser::Vec3f {-this->x, -this->y, -this->z};
 }
 
-// Overload += and -= operator
 parser::Vec3f& parser::Vec3f::operator+=(const Vec3f &rhs) {
     this->x = this->x + rhs.x;
     this->y = this->y + rhs.y;
@@ -381,7 +372,6 @@ parser::Vec3f& parser::Vec3f::operator-=(const Vec3f &rhs) {
     return *this;
 }
 
-// Overload + and - operators for binary addition and subtraction operations
 parser::Vec3f parser::operator+(const parser::Vec3f &lhs, const parser::Vec3f &rhs) {
     return parser::Vec3f {lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z};
 }
@@ -389,7 +379,6 @@ parser::Vec3f parser::operator-(const parser::Vec3f &lhs, const parser::Vec3f &r
     return parser::Vec3f {lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z};
 }
 
-// Overload * operator
 template <typename T>
 parser::Vec3f& parser::Vec3f::operator*=(const T &rhs) {
     this->x = this->x * (float) rhs;
@@ -401,7 +390,6 @@ template parser::Vec3f& parser::Vec3f::operator*=<int>(const int &);
 template parser::Vec3f& parser::Vec3f::operator*=<float>(const float &);
 template parser::Vec3f& parser::Vec3f::operator*=<double>(const double &);
 
-// Overload = operator
 parser::Vec3f& parser::Vec3f::operator=(const Vec3f& rhs) {
     this->x = rhs.x;
     this->y = rhs.y;
