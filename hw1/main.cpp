@@ -1,6 +1,9 @@
 #include "support_files/parser.h"
 #include "support_files/ppm.h"
-#include "support_files/ray_trace.h"
+#include "support_files/ray.h"
+#include "support_files/ray_sphere.h"
+//#include "support_files/ray_triangle.h"
+//#include "support_files/ray_mesh.h"
 #include <iostream>
 #include <string>
 
