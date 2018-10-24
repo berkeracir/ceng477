@@ -15,6 +15,7 @@ int main(int argc, char* argv[]) {
     Scene scene;
 
     scene.loadFromXml(argv[1]);
+    std::cout << scene << std::endl;
 
     // Iterate through cameras
     for (std::size_t cid = 0; cid < scene.cameras.size(); cid++) {    // Actual Camera ID is cid+1
@@ -60,7 +61,9 @@ int main(int argc, char* argv[]) {
             unsigned int image_index = 0;
 
             // Iterate through image plane (Width:nx, Height:ny)
+            bool col_flag = false;
             for (int row = 0; row < ny; row++) {
+                bool row_flag = false;
                 for (int col = 0; col < nx; col++) {
                     // Ray Form: r(t) = o + t.d
                     // where d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v)
@@ -71,10 +74,23 @@ int main(int argc, char* argv[]) {
                         image[image_index++] = 255;
                         image[image_index++] = 0;
                         image[image_index++] = 0;
+                        row_flag = true;
                     }
-                    else
+                    else {
                         image_index += 3;
+
+                        if (row_flag) {
+                            image_index = (row+1) * nx * 3;
+                            break;
+                        }
+                    }
                 }
+
+                if (row_flag)
+                    col_flag = true;
+
+                else if (!row_flag && col_flag)
+                    break;
             }
         }
 
@@ -89,7 +105,9 @@ int main(int argc, char* argv[]) {
             unsigned int image_index = 0;
 
             // Iterate through image plane (Width:nx, Height:ny)
+            bool col_flag = false;
             for (int row = 0; row < ny; row++) {
+                bool row_flag = false;
                 for (int col = 0; col < nx; col++) {
                     // Ray Form: r(t) = o + t.d
                     // where d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v)
@@ -101,9 +119,21 @@ int main(int argc, char* argv[]) {
                         image[image_index++] = 255;
                         image[image_index++] = 0;
                     }
-                    else
+                    else {
                         image_index += 3;
+
+                        if (row_flag) {
+                            image_index = (row+1) * nx * 3;
+                            break;
+                        }
+                    }
                 }
+
+                if (row_flag)
+                    col_flag = true;
+
+                else if (!row_flag && col_flag)
+                    break;
             }
         }
 
