@@ -201,16 +201,10 @@ int main(int argc, char* argv[]) {
         unsigned char *image = new unsigned char [nx * ny * 3];
         int i_img = 0;
         for (int i_ray = 0; i_ray < nx*ny; i_ray++) {
-            if (rays[i_ray].t < 0) {
-                image[i_img++] = 0;
-                image[i_img++] = 0;
-                image[i_img++] = 0;
-            }
-            else {
-                image[i_img++] = 180 - 5 * rays[i_ray].mid;
-                image[i_img++] = 255 - 15 * rays[i_ray].mid;
-                image[i_img++] = 50 + 45 * rays[i_ray].mid;
-            }
+            Vec3i color = color_clamp(rays[i_ray], scene);
+            image[i_img++] = color.x;
+            image[i_img++] = color.y;
+            image[i_img++] = color.z;
         }
 
         // Output the Image Plane
