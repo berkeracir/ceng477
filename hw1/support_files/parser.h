@@ -22,7 +22,7 @@ namespace parser
         Vec3f operator*(const T &rhs);
 
         // Overload - operator for unary minus operation
-        Vec3f operator-();
+        //Vec3f operator-();
 
         // Overload += and -= operator
         Vec3f& operator+=(const Vec3f &rhs);
@@ -139,6 +139,9 @@ namespace parser
     // Overload + and - operators for binary addition and subtraction operations
     Vec3f operator+(const Vec3f &lhs, const Vec3f &rhs);
     Vec3f operator-(const Vec3f &lhs, const Vec3f &rhs);
+    
+    // Overload - operator for unary minus operation
+    Vec3f operator-(const Vec3f &rhs);
 
     // Overload * operator for scalar multiplication
     template <typename T>
