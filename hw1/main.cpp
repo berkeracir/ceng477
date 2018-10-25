@@ -4,6 +4,7 @@
 #include "support_files/ray_sphere.h"
 #include "support_files/ray_triangle.h"
 #include "support_files/ray_mesh.h"
+#include "support_files/shader.h"
 #include <iostream>
 #include <string>
 
