@@ -8,7 +8,7 @@
 //  r(t) = o + t.d
 struct Ray {
     parser::Vec3f o;
-    float t = -1; // t = -1 means no intersection or uninitialized vector
+    float t = 0; // t = 0: uninitialized vector, t = -1: no intersection or initialized but not checked for intersection
     parser::Vec3f d;
     int mid = 0; // mid = 0 means no intersection or unitialized vector
     parser::Vec3f n; // n is the normal vector of r(t) = o + t.d with given t
