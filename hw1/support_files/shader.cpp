@@ -72,6 +72,66 @@ bool not_in_shadow(const Ray &ray, const Vec3f &position, const Scene &scene) {
     return true;
 }
 
+// Complete Ray Structure with given paramaters
+Ray reflection_ray(const Vec3f &o, const Vec3f &d, const Scene &scene) {
+    Ray rr;
+    rr.o = o;
+    rr.d = d;
+    rr.t = -1;
+    float t = -1;
+
+    for (std::size_t sid = 0; sid < scene.spheres.size(); sid++) {
+        Vec3f c = scene.vertex_data[scene.spheres[sid].center_vertex_id-1];
+        float r = scene.spheres[sid].radius;
+        float t_intersect = ray_sphere_intersection(o, d, c, r);
+
+        if ((t_intersect >= 0) && ((rr.t < 0) || (t_intersect < rr.t))) {
+            rr.t = t_intersect;
+            rr.mid = scene.spheres[sid].material_id;
+            Vec3f n = rr.o + rr.t * rr.d - c;
+            rr.n = vector_normalize(n);
+        }
+    }
+
+    for (std::size_t tid = 0; tid < scene.triangles.size(); tid++) {
+        Face indice = scene.triangles[tid].indices;
+        
+        Vec3f a = scene.vertex_data[indice.v0_id-1];
+        Vec3f b = scene.vertex_data[indice.v1_id-1];
+        Vec3f c = scene.vertex_data[indice.v2_id-1];
+
+        float t_intersect = ray_triangle_intersection(o, d, a, b, c);
+
+        if ((t_intersect >= 0) && ((rr.t < 0) || (t_intersect < rr.t))) {
+            rr.t = t_intersect;
+            rr.mid = scene.triangles[tid].material_id;
+            Vec3f n = vector_cross(b-a, c-b);
+            rr.n = vector_normalize(n);
+        }
+    }
+
+    for (std::size_t meid = 0; meid < scene.meshes.size(); meid++) {
+        for (std::size_t fid = 0; fid < scene.meshes[meid].faces.size(); fid++) {
+            Face face = scene.meshes[meid].faces[fid];
+
+            Vec3f a = scene.vertex_data[face.v0_id-1];
+            Vec3f b = scene.vertex_data[face.v1_id-1];
+            Vec3f c = scene.vertex_data[face.v2_id-1];
+
+            float t_intersect = ray_triangle_intersection(o, d, a, b, c);
+
+            if ((t_intersect >= 0) && ((rr.t < 0) || (t_intersect < rr.t))) {
+                rr.t = t_intersect;
+                rr.mid = scene.meshes[meid].material_id;
+                Vec3f n = vector_cross(b-a, c-b);
+                rr.n = vector_normalize(n);
+            }
+        }
+    }
+
+    return rr;
+}
+
 Vec3f diffuse_shading(const Ray &ray, const Vec3f &coefficient, const Scene &scene) {
     Vec3f result {0, 0, 0};
     Vec3f x = ray.o + ray.t * ray.d;
@@ -126,17 +186,31 @@ Vec3f specular_shading(const Ray &ray, const Vec3f &coefficient, const float pho
 
     return result;
 }
-Vec3f specular_reflection();
+
+Vec3f specular_reflection(const Ray &ray, const Vec3f &coefficient, const Scene &scene, int rec_depth) {
+    if (rec_depth <= scene.max_recursion_depth)
+        return Vec3f {0, 0, 0};
+
+    Vec3f result {0, 0, 0};
+    Vec3f x = ray.o + ray.t * ray.d;
+    Vec3f wo = vector_normalize(-ray.d);
+
+    Vec3f wr = -wo - 2 * ray.n * vector_dot(ray.n, wo);
+    Ray rr = reflection_ray(x, wr, scene);
+
+    return scalar_vec3f_multiplication(coefficient, get_color(rr, scene, rec_depth));
+}
 
 Vec3f get_color(const Ray &ray, const Scene &scene, int rec_depth) {
-    if (ray.t < 1) {
+    if (ray.t < 0) {
         return Vec3f {(float) scene.background_color.x, (float) scene.background_color.y, (float) scene.background_color.z};
     }
     else {
         Material material = scene.materials[ray.mid-1];
         return ambient_shading(material.ambient, scene.ambient_light)
                + diffuse_shading(ray, material.diffuse, scene)
-               + specular_shading(ray, material.specular, material.phong_exponent, scene);
+               + specular_shading(ray, material.specular, material.phong_exponent, scene)
+               + specular_reflection(ray, material.mirror, scene, rec_depth+1);
     }
 }
 
@@ -149,7 +223,7 @@ float clamp(float channel) {
 
 // Clamp the Vec3f into color Vec3i
 Vec3f color_clamp(const Ray &ray, const Scene &scene) {
-    if (ray.t < 1) {
+    if (ray.t < 0) {
         return Vec3f {(float) scene.background_color.x, (float) scene.background_color.y, (float) scene.background_color.z};
     }
     else {
