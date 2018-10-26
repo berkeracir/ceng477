@@ -32,22 +32,49 @@ Vec3f ambient_shading(const Vec3f &coefficient, const Vec3f &radiance) {
 bool not_in_shadow(const Ray &ray, const Vec3f &position, const Scene &scene) {
     float t = vector_magnitude(position - ray.o); // Assumed ray.d is unit vector
 
-    for (std::size_t i = 0; i < scene.spheres.size(); i++) {
-        Vec3f c = scene.vertex_data[scene.spheres[i].center_vertex_id-1];
-        float r = scene.spheres[i].radius;
+    for (std::size_t sid = 0; sid < scene.spheres.size(); sid++) {
+        Vec3f c = scene.vertex_data[scene.spheres[sid].center_vertex_id-1];
+        float r = scene.spheres[sid].radius;
         float t_intersect = ray_sphere_intersection(ray.o, ray.d, c, r);
 
-        if ((t_intersect < 0) || (t_intersect >= t))
-            return true;
+        if ((t_intersect >= 0) && (t_intersect < t))
+            return false;
     }
 
-    return false;
+    for (std::size_t tid = 0; tid < scene.triangles.size(); tid++) {
+        Face indice = scene.triangles[tid].indices;
+        
+        Vec3f a = scene.vertex_data[indice.v0_id-1];
+        Vec3f b = scene.vertex_data[indice.v1_id-1];
+        Vec3f c = scene.vertex_data[indice.v2_id-1];
+
+        float t_intersect = ray_triangle_intersection(ray.o, ray.d, a, b, c);
+
+        if ((t_intersect >= 0) && (t_intersect < t))
+            return false;
+    }
+
+    for (std::size_t meid = 0; meid < scene.meshes.size(); meid++) {
+        for (std::size_t fid = 0; fid < scene.meshes[meid].faces.size(); fid++) {
+            Face face = scene.meshes[meid].faces[fid];
+
+            Vec3f a = scene.vertex_data[face.v0_id-1];
+            Vec3f b = scene.vertex_data[face.v1_id-1];
+            Vec3f c = scene.vertex_data[face.v2_id-1];
+
+            float t_intersect = ray_triangle_intersection(ray.o, ray.d, a, b, c);
+
+            if ((t_intersect >= 0) && (t_intersect < t))
+                return false;
+        }
+    }
+
+    return true;
 }
 
 Vec3f diffuse_shading(const Ray &ray, const Vec3f &coefficient, const Scene &scene) {
     Vec3f result {0, 0, 0};
     Vec3f x = ray.o + ray.t * ray.d;
-    //Vec3f wo = -ray.d*(1/vector_magnitude(ray.d));
     
     for (size_t lid = 0; lid < scene.point_lights.size(); lid++) {
         PointLight pointLight = scene.point_lights[lid];
@@ -74,7 +101,7 @@ Vec3f diffuse_shading(const Ray &ray, const Vec3f &coefficient, const Scene &sce
 Vec3f specular_shading(const Ray &ray, const Vec3f &coefficient, const float phong, const Scene &scene) {
     Vec3f result {0, 0, 0};
     Vec3f x = ray.o + ray.t * ray.d;
-    Vec3f wo = -ray.d * (1.0 / vector_magnitude(ray.d));
+    Vec3f wo = vector_normalize(-ray.d);
     
     for (size_t lid = 0; lid < scene.point_lights.size(); lid++) {
         PointLight pointLight = scene.point_lights[lid];
