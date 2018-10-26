@@ -18,6 +18,9 @@ struct Ray {
 // |(x,y,z)| = sqrt(x*x+y*y+z*z)
 float vector_magnitude(const parser::Vec3f &vec);
 
+// Vector (parser::Vec3f) normalization
+parser::Vec3f vector_normalize(const parser::Vec3f &vec);
+
 // Vector (parser::Vec3f) addition
 // (x,y,z) + (u,v,w) = (x+y, y+v, z+w)
 parser::Vec3f vector_add(const parser::Vec3f &rhs, const parser::Vec3f &lhs);

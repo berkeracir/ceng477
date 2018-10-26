@@ -5,6 +5,10 @@ float vector_magnitude(const parser::Vec3f &vec) {
     return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
 }
 
+parser::Vec3f vector_normalize(const parser::Vec3f &vec) {
+    return (1.0 / vector_magnitude(vec)) * vec;
+}
+
 parser::Vec3f vector_add(const parser::Vec3f &lhs, const parser::Vec3f &rhs) {
     return parser::Vec3f {lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z};
 }

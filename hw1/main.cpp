@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
                         rays[index].t = t;
                         rays[index].mid = scene.spheres[sid].material_id;
                         Vec3f n = rays[index].o + rays[index].t*rays[index].d - c;
-                        rays[index].n = n * (1.0 / vector_magnitude(n));
+                        rays[index].n = vector_normalize(n);
                         index++;
                         row_flag = true;
                     }
@@ -129,7 +129,7 @@ int main(int argc, char* argv[]) {
                         rays[index].t = t;
                         rays[index].mid = scene.triangles[tid].material_id;
                         Vec3f n = vector_cross(b-a, c-b);
-                        rays[index].n = n * (1.0 / vector_magnitude(n));
+                        rays[index].n = vector_normalize(n);
                         index++;
                         //row_flag = true;
                     }
@@ -178,7 +178,7 @@ int main(int argc, char* argv[]) {
                             rays[index].t = t;
                             rays[index].mid = scene.meshes[meid].material_id;
                             Vec3f n = vector_cross(b-a, c-b);
-                            rays[index].n = n * (1.0 / vector_magnitude(n));
+                            rays[index].n = vector_normalize(n);
                             index++;
                             //row_flag = true;
                         }
