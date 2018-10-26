@@ -1,4 +1,6 @@
 #include "shader.h"
+#include "ray_triangle.h"
+#include "ray_sphere.h"
 #include <math.h>
 
 using namespace parser;
@@ -25,6 +27,23 @@ Vec3f ambient_shading(const Vec3f &coefficient, const Vec3f &radiance) {
     return scalar_vec3f_multiplication(coefficient, radiance);
 }
 
+// Check whether the Ray is intersecting with the light source
+// Returns true if the point is not in shadow, otherwise false
+bool not_in_shadow(const Ray &ray, const Vec3f &position, const Scene &scene) {
+    float t = vector_magnitude(position - ray.o); // Assumed ray.d is unit vector
+
+    for (std::size_t i = 0; i < scene.spheres.size(); i++) {
+        Vec3f c = scene.vertex_data[scene.spheres[i].center_vertex_id-1];
+        float r = scene.spheres[i].radius;
+        float t_intersect = ray_sphere_intersection(ray.o, ray.d, c, r);
+
+        if ((t_intersect < 0) || (t_intersect >= t))
+            return true;
+    }
+
+    return false;
+}
+
 Vec3f diffuse_shading(const Ray &ray, const Vec3f &coefficient, const Scene &scene) {
     Vec3f result {0, 0, 0};
     Vec3f x = ray.o + ray.t * ray.d;
@@ -32,14 +51,21 @@ Vec3f diffuse_shading(const Ray &ray, const Vec3f &coefficient, const Scene &sce
     
     for (size_t lid = 0; lid < scene.point_lights.size(); lid++) {
         PointLight pointLight = scene.point_lights[lid];
-        // Check if the point is in shadow
 
         Vec3f wi = pointLight.position - x;
         float r = vector_magnitude(wi);
         wi *= (1.0 / r);
-        float cos_theta = std::max((float) 0, vector_dot(wi, ray.n));
 
-        result += (cos_theta / (r * r)) * scalar_vec3f_multiplication(coefficient, pointLight.intensity);
+        Ray shadow_ray;
+        shadow_ray.o = x + wi * scene.shadow_ray_epsilon;
+        shadow_ray.d = wi;
+
+        // Check if the point is in shadow
+        if (not_in_shadow(shadow_ray, pointLight.position, scene)) {
+            float cos_theta = std::max((float) 0, vector_dot(wi, ray.n));
+
+            result += (cos_theta / (r * r)) * scalar_vec3f_multiplication(coefficient, pointLight.intensity);
+        }
     }
 
     return result;
@@ -57,10 +83,18 @@ Vec3f specular_shading(const Ray &ray, const Vec3f &coefficient, const float pho
         Vec3f wi = (pointLight.position - x);
         float r = vector_magnitude(wi);
         wi *= (1.0 / r);
-        Vec3f h = (wi + wo) * (1.0 / vector_magnitude(wi+wo));
-        float cos_alpha = std::max((float) 0, vector_dot(ray.n, h));
 
-        result += (pow(cos_alpha, phong) / (r*r)) * scalar_vec3f_multiplication(coefficient, pointLight.intensity);
+        Ray shadow_ray;
+        shadow_ray.o = x + wi * scene.shadow_ray_epsilon;
+        shadow_ray.d = wi;
+
+        // Check if the point is in shadow
+        if (not_in_shadow(shadow_ray, pointLight.position, scene)) {
+            Vec3f h = (wi + wo) * (1.0 / vector_magnitude(wi+wo));
+            float cos_alpha = std::max((float) 0, vector_dot(ray.n, h));
+
+            result += (pow(cos_alpha, phong) / (r*r)) * scalar_vec3f_multiplication(coefficient, pointLight.intensity);
+        }
     }
 
     return result;
