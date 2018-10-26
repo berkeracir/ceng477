@@ -188,17 +188,19 @@ Vec3f specular_shading(const Ray &ray, const Vec3f &coefficient, const float pho
 }
 
 Vec3f specular_reflection(const Ray &ray, const Vec3f &coefficient, const Scene &scene, int rec_depth) {
-    if (rec_depth <= scene.max_recursion_depth)
+    if (!coefficient.x && !coefficient.y && !coefficient.z)
         return Vec3f {0, 0, 0};
+    else if (rec_depth > scene.max_recursion_depth) // TODO
+        return Vec3f {0, 0, 0};
+    else {
+        Vec3f wo = vector_normalize(-ray.d);
+        Vec3f wr = -wo + 2 * ray.n * vector_dot(ray.n, wo);
+        Vec3f x = ray.o + ray.t * ray.d + wr * scene.shadow_ray_epsilon;
 
-    Vec3f result {0, 0, 0};
-    Vec3f x = ray.o + ray.t * ray.d;
-    Vec3f wo = vector_normalize(-ray.d);
+        Ray rr = reflection_ray(x, wr, scene);
 
-    Vec3f wr = -wo - 2 * ray.n * vector_dot(ray.n, wo);
-    Ray rr = reflection_ray(x, wr, scene);
-
-    return scalar_vec3f_multiplication(coefficient, get_color(rr, scene, rec_depth));
+        return scalar_vec3f_multiplication(coefficient, get_color(rr, scene, rec_depth));
+    }
 }
 
 Vec3f get_color(const Ray &ray, const Scene &scene, int rec_depth) {
