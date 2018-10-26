@@ -7,6 +7,7 @@
 #include "support_files/shader.h"
 #include <iostream>
 #include <string>
+#include <cmath>
 
 typedef unsigned char RGB[3];
 
@@ -80,7 +81,8 @@ int main(int argc, char* argv[]) {
                    if ((t >= 1) && (rays[index].t == -1 || t == positive_min(t, rays[index].t))) {
                         rays[index].t = t;
                         rays[index].mid = scene.spheres[sid].material_id;
-                        rays[index].n = rays[index].o + rays[index].t*rays[index].d - c;
+                        Vec3f n = rays[index].o + rays[index].t*rays[index].d - c;
+                        rays[index].n = n * (1.0 / vector_magnitude(n));
                         index++;
                         row_flag = true;
                     }
@@ -126,7 +128,8 @@ int main(int argc, char* argv[]) {
                     if ((t >= 1) && (rays[index].t == -1 || t == positive_min(t, rays[index].t))) {
                         rays[index].t = t;
                         rays[index].mid = scene.triangles[tid].material_id;
-                        rays[index].n = vector_cross(b-a, c-b);
+                        Vec3f n = vector_cross(b-a, c-b);
+                        rays[index].n = n * (1.0 / vector_magnitude(n));
                         index++;
                         //row_flag = true;
                     }
@@ -174,7 +177,8 @@ int main(int argc, char* argv[]) {
                         if ((t >= 1) && (rays[index].t == -1 || t == positive_min(t, rays[index].t))) {
                             rays[index].t = t;
                             rays[index].mid = scene.meshes[meid].material_id;
-                            rays[index].n = vector_cross(b-a, c-b);
+                            Vec3f n = vector_cross(b-a, c-b);
+                            rays[index].n = n * (1.0 / vector_magnitude(n));
                             index++;
                             //row_flag = true;
                         }
@@ -201,10 +205,10 @@ int main(int argc, char* argv[]) {
         unsigned char *image = new unsigned char [nx * ny * 3];
         int i_img = 0;
         for (int i_ray = 0; i_ray < nx*ny; i_ray++) {
-            Vec3i color = color_clamp(rays[i_ray], scene);
-            image[i_img++] = color.x;
-            image[i_img++] = color.y;
-            image[i_img++] = color.z;
+            Vec3f color = color_clamp(rays[i_ray], scene);
+            image[i_img++] = (unsigned char) round(color.x);
+            image[i_img++] = (unsigned char) round(color.y);
+            image[i_img++] = (unsigned char) round(color.z);
         }
 
         // Output the Image Plane

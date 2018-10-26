@@ -12,7 +12,7 @@ float positive_min(float x, float y);
 parser::Vec3f get_color(const Ray &ray, const parser::Scene &scene, int rec_depth);
 
 // Clamp the Vec3f into color Vec3i
-parser::Vec3i color_clamp(const Ray &ray, const parser::Scene &scene);
+parser::Vec3f color_clamp(const Ray &ray, const parser::Scene &scene);
 
 
 #endif
