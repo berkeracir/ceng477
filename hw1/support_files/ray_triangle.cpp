@@ -28,17 +28,29 @@ float matrix3_determinant(MATRIX M) { // Returns determinant of 3x3 matrix (MATR
 // Output: Return the t value, if it satisfies the conditions, otherwise return -1
 float ray_triangle_intersection(const parser::Vec3f &o, const parser::Vec3f &d, const parser::Vec3f &a, const parser::Vec3f &b, const parser::Vec3f &c) {
     MATRIX matrix_A = {a-b, a-c, d};
-    MATRIX matrix_B = {a-o, a-c, d};
-    MATRIX matrix_C = {a-b, a-o, d};
-    MATRIX matrix_T = {a-b, a-c, a-o};
     float det_matrix_A = matrix3_determinant(matrix_A);
 
-    float B = matrix3_determinant(matrix_B)/det_matrix_A;
-    float C = matrix3_determinant(matrix_C)/det_matrix_A;
+    MATRIX matrix_T = {a-b, a-c, a-o};
     float t = matrix3_determinant(matrix_T)/det_matrix_A;
+    if (t < 0 - global_shadow_ray_epsilon)
+        return -1;
 
-    if ((t > 0) && (B+C <= 1) && (B >= 0) && (C >= 0))
+    MATRIX matrix_B = {a-o, a-c, d};
+    float B = matrix3_determinant(matrix_B)/det_matrix_A;
+    if (B < 0 - global_shadow_ray_epsilon)
+        return -1;
+
+    MATRIX matrix_C = {a-b, a-o, d};
+    float C = matrix3_determinant(matrix_C)/det_matrix_A;
+    if (C < 0 - global_shadow_ray_epsilon)
+        return -1;
+
+    if (B+C > 1 + global_shadow_ray_epsilon)
+        return -1;
+    
+    return t;
+    /*if ((t > 0) && (B+C <= 1) && (B >= 0) && (C >= 0))
         return t;
     else
-        return -1;
+        return -1;*/
 }

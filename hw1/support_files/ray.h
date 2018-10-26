@@ -8,13 +8,18 @@
 //  r(t) = o + t.d
 struct Ray {
     parser::Vec3f o;
+    float t = 0; // t = 0: uninitialized vector, t = -1: no intersection or initialized but not checked for intersection
     parser::Vec3f d;
-    float t;
+    int mid = 0; // mid = 0 means no intersection or unitialized vector
+    parser::Vec3f n; // n is the normal vector of r(t) = o + t.d with given t
 };
 
 // Vector (parser::Vec3f) magnitude
 // |(x,y,z)| = sqrt(x*x+y*y+z*z)
 float vector_magnitude(const parser::Vec3f &vec);
+
+// Vector (parser::Vec3f) normalization
+parser::Vec3f vector_normalize(const parser::Vec3f &vec);
 
 // Vector (parser::Vec3f) addition
 // (x,y,z) + (u,v,w) = (x+y, y+v, z+w)

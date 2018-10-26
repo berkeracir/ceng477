@@ -355,9 +355,9 @@ template parser::Vec3f parser::operator*<int>(const int &, const parser::Vec3f &
 template parser::Vec3f parser::operator*<float>(const float &, const parser::Vec3f &);
 template parser::Vec3f parser::operator*<double>(const double &, const parser::Vec3f &);
 
-parser::Vec3f parser::Vec3f::operator-() {
+/*parser::Vec3f parser::Vec3f::operator-() {
     return parser::Vec3f {-this->x, -this->y, -this->z};
-}
+}*/
 
 parser::Vec3f& parser::Vec3f::operator+=(const Vec3f &rhs) {
     this->x = this->x + rhs.x;
@@ -378,6 +378,10 @@ parser::Vec3f parser::operator+(const parser::Vec3f &lhs, const parser::Vec3f &r
 parser::Vec3f parser::operator-(const parser::Vec3f &lhs, const parser::Vec3f &rhs) {
     return parser::Vec3f {lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z};
 }
+// Overload - operator for unary minus operation
+parser::Vec3f parser::operator-(const parser::Vec3f &rhs) {
+    return parser::Vec3f {-rhs.x, -rhs.y, -rhs.z};
+}
 
 template <typename T>
 parser::Vec3f& parser::Vec3f::operator*=(const T &rhs) {
@@ -390,7 +394,7 @@ template parser::Vec3f& parser::Vec3f::operator*=<int>(const int &);
 template parser::Vec3f& parser::Vec3f::operator*=<float>(const float &);
 template parser::Vec3f& parser::Vec3f::operator*=<double>(const double &);
 
-parser::Vec3f& parser::Vec3f::operator=(const Vec3f& rhs) {
+parser::Vec3f& parser::Vec3f::operator=(const parser::Vec3f& rhs) {
     this->x = rhs.x;
     this->y = rhs.y;
     this->z = rhs.z;
