@@ -5,6 +5,8 @@
 #include <vector>
 #include <iostream>
 
+extern float global_shadow_ray_epsilon;
+
 namespace parser
 {
     //Notice that all the structures are as simple as possible

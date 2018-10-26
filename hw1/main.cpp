@@ -13,10 +13,14 @@ typedef unsigned char RGB[3];
 
 using namespace parser;
 
+float global_shadow_ray_epsilon;
+
 int main(int argc, char* argv[]) {
     Scene scene;
 
     scene.loadFromXml(argv[1]);
+
+    global_shadow_ray_epsilon = scene.shadow_ray_epsilon;
 
     // Iterate through cameras
     for (std::size_t cid = 0; cid < scene.cameras.size(); cid++) {    // Actual Camera ID is cid+1
