@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
 
                     float t_intersect = ray_sphere_intersection(e, d, c, radius);
 
-                    if ((t_intersect >= 0) && (t == -1 || t_intersect == positive_min(t_intersect, t))) {
+                    if ((t_intersect > 0) && (t == -1 || t_intersect == positive_min(t_intersect, t))) {
                         t = t_intersect;
                         mid = scene.spheres[sid].material_id;
                         n = vector_normalize(e + t * d - c);
@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
 
                     float t_intersect = ray_triangle_intersection(e, d, a, b, c);
 
-                    if ((t_intersect >= 0) && (t == -1 || t_intersect == positive_min(t_intersect, t))) {
+                    if ((t_intersect > 0) && (t == -1 || t_intersect == positive_min(t_intersect, t))) {
                         t = t_intersect;
                         mid = scene.triangles[tid].material_id;
                         n = vector_normalize(vector_cross(b-a, c-b));
@@ -142,7 +142,7 @@ int main(int argc, char* argv[]) {
 
                         float t_intersect = ray_triangle_intersection(e, d, a, b, c);
 
-                        if ((t_intersect >= 0) && (t == -1 || t_intersect == positive_min(t_intersect, t))) {
+                        if ((t_intersect > 0) && (t == -1 || t_intersect == positive_min(t_intersect, t))) {
                             t = t_intersect;
                             mid = scene.meshes[meid].material_id;
                             n = vector_normalize(vector_cross(b-a, c-b));
