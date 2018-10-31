@@ -40,9 +40,9 @@ int main(int argc, char* argv[])
         float ph = (t-b)/(float) ny; // Pixel height of each pixel
 
         Vec3f e = camera.position; // Camera position
-        Vec3f v = camera.up; // Camera Up vector (v)
-        Vec3f w = -camera.gaze; // Camera Opposite Gaze vector (w)
-        Vec3f u = vector_cross(v, w); // Camera Right vector (u)
+        Vec3f v = vector_normalize(camera.up); // Camera Up vector (v)
+        Vec3f w = vector_normalize(-camera.gaze); // Camera Opposite Gaze vector (w)
+        Vec3f u = vector_normalize(vector_cross(v, w)); // Camera Right vector (u)
         Vec3f m = (-w) * d; // Vector to middle of image plane from camera
         Vec3f q = m + l*u + t*v; // Vector to top left corner of image plane from camera
         unsigned char* image = new unsigned char [nx * ny * 3];
