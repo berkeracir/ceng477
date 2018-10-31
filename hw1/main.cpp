@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
                     // Vec3f d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v);
                     float t = ray_sphere_intersection(rays[index].o, rays[index].d, c, radius);
 
-                   if ((t >= 1) && (rays[index].t == -1 || t == positive_min(t, rays[index].t))) {
+                   if ((t > 0) && (rays[index].t == -1 || t == positive_min(t, rays[index].t))) {
                         rays[index].t = t;
                         rays[index].mid = scene.spheres[sid].material_id;
                         Vec3f n = rays[index].o + rays[index].t*rays[index].d - c;
@@ -129,7 +129,7 @@ int main(int argc, char* argv[]) {
                     // Vec3f d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v);
                     float t = ray_triangle_intersection(rays[index].o, rays[index].d, a, b, c);
 
-                    if ((t >= 1) && (rays[index].t == -1 || t == positive_min(t, rays[index].t))) {
+                    if ((t > 0) && (rays[index].t == -1 || t == positive_min(t, rays[index].t))) {
                         rays[index].t = t;
                         rays[index].mid = scene.triangles[tid].material_id;
                         Vec3f n = vector_cross(b-a, c-b);
@@ -178,7 +178,7 @@ int main(int argc, char* argv[]) {
                         // Vec3f d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v);
                         float t = ray_triangle_intersection(rays[index].o, rays[index].d, a, b, c);
 
-                        if ((t >= 1) && (rays[index].t == -1 || t == positive_min(t, rays[index].t))) {
+                        if ((t > 0) && (rays[index].t == -1 || t == positive_min(t, rays[index].t))) {
                             rays[index].t = t;
                             rays[index].mid = scene.meshes[meid].material_id;
                             Vec3f n = vector_cross(b-a, c-b);
