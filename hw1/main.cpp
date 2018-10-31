@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
                 }
 
 
-                Vec3f color = color_clamp(ray, scene);
+                Vec3f color = {0, 0, 0};
                 image[i_img++] = (unsigned char) round(color.x);
                 image[i_img++] = (unsigned char) round(color.y);
                 image[i_img++] = (unsigned char) round(color.z);
