@@ -169,6 +169,8 @@ int main(int argc, char* argv[]) {
 
         // Output the Image Plane
         write_ppm(camera.image_name.c_str(), image, nx, ny);
+
+        delete[] image;
     }
 
    return 0;
