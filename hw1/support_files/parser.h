@@ -115,6 +115,9 @@ namespace parser
         std::vector<Triangle> triangles;
         std::vector<Sphere> spheres;
 
+        std::vector<Vec3f> min_mesh_vector;
+        std::vector<Vec3f> max_mesh_vector;
+
         //Functions
         void loadFromXml(const std::string& filepath);
     };

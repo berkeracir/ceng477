@@ -53,9 +53,6 @@ int main(int argc, char* argv[]) {
         unsigned char *image = new unsigned char [nx * ny * 3];
         unsigned int index = 0;
 
-        std::vector<Vec3f> min_mesh_vector;
-        std::vector<Vec3f> max_mesh_vector;
-
         for (std::size_t meid = 0; meid < scene.meshes.size(); meid++) {
             Face face = scene.meshes[meid].faces[0];
 
@@ -81,8 +78,8 @@ int main(int argc, char* argv[]) {
                 z_min = std::min(z_min, std::min(v0.z, std::min(v1.z, v2.z)));
             }
 
-            min_mesh_vector.push_back(Vec3f {x_max, y_max, z_max});
-            max_mesh_vector.push_back(Vec3f {x_min, y_min, z_min});
+            scene.min_mesh_vector.push_back(Vec3f {x_max, y_max, z_max});
+            scene.max_mesh_vector.push_back(Vec3f {x_min, y_min, z_min});
         }
 
         for (int row = 0; row < ny; row++) {
@@ -129,7 +126,7 @@ int main(int argc, char* argv[]) {
 
                 // Iterate through meshes
                 for (std::size_t meid = 0; meid < scene.meshes.size(); meid++) {
-                    if (is_ray_mesh_intersect(e, d, max_mesh_vector[meid], min_mesh_vector[meid])) {
+                    if (is_ray_mesh_intersect(e, d, scene.max_mesh_vector[meid], scene.min_mesh_vector[meid])) {
                         /*Vec3f c = (max_mesh_vector[meid] + min_mesh_vector[meid]) * (1.0/2.0);
                         float r = vector_magnitude(c - max_mesh_vector[meid]) + scene.shadow_ray_epsilon;
 

@@ -1,4 +1,5 @@
 #include "shader.h"
+#include "ray_mesh.h"
 #include "ray_triangle.h"
 #include "ray_sphere.h"
 #include <math.h>
@@ -55,17 +56,19 @@ bool not_in_shadow(const Ray &ray, const Vec3f &position, const Scene &scene) {
     }
 
     for (std::size_t meid = 0; meid < scene.meshes.size(); meid++) {
-        for (std::size_t fid = 0; fid < scene.meshes[meid].faces.size(); fid++) {
-            Face face = scene.meshes[meid].faces[fid];
+        if (is_ray_mesh_intersect(ray.o, ray.d, scene.max_mesh_vector[meid], scene.min_mesh_vector[meid])) {
+            for (std::size_t fid = 0; fid < scene.meshes[meid].faces.size(); fid++) {
+                Face face = scene.meshes[meid].faces[fid];
 
-            Vec3f a = scene.vertex_data[face.v0_id-1];
-            Vec3f b = scene.vertex_data[face.v1_id-1];
-            Vec3f c = scene.vertex_data[face.v2_id-1];
+                Vec3f a = scene.vertex_data[face.v0_id-1];
+                Vec3f b = scene.vertex_data[face.v1_id-1];
+                Vec3f c = scene.vertex_data[face.v2_id-1];
 
-            float t_intersect = ray_triangle_intersection(ray.o, ray.d, a, b, c);
+                float t_intersect = ray_triangle_intersection(ray.o, ray.d, a, b, c);
 
-            if ((t_intersect >= 0) && (t_intersect < t))
-                return false;
+                if ((t_intersect >= 0) && (t_intersect < t))
+                    return false;
+            }
         }
     }
 
@@ -113,21 +116,23 @@ Ray reflection_ray(const Vec3f &o, const Vec3f &d, const Scene &scene) {
     }
 
     for (std::size_t meid = 0; meid < scene.meshes.size(); meid++) {
-        for (std::size_t fid = 0; fid < scene.meshes[meid].faces.size(); fid++) {
-            Face face = scene.meshes[meid].faces[fid];
+        if (is_ray_mesh_intersect(o, d, scene.max_mesh_vector[meid], scene.min_mesh_vector[meid])) {
+            for (std::size_t fid = 0; fid < scene.meshes[meid].faces.size(); fid++) {
+                Face face = scene.meshes[meid].faces[fid];
 
-            Vec3f a = scene.vertex_data[face.v0_id-1];
-            Vec3f b = scene.vertex_data[face.v1_id-1];
-            Vec3f c = scene.vertex_data[face.v2_id-1];
+                Vec3f a = scene.vertex_data[face.v0_id-1];
+                Vec3f b = scene.vertex_data[face.v1_id-1];
+                Vec3f c = scene.vertex_data[face.v2_id-1];
 
-            float t_intersect = ray_triangle_intersection(o, d, a, b, c);
+                float t_intersect = ray_triangle_intersection(o, d, a, b, c);
 
-            //if ((t_intersect >= 0) && ((rr.t < 0) || (t_intersect < rr.t))) {
-            if ((t_intersect >= 0) && (t_intersect < rr.t)) {
-                rr.t = t_intersect;
-                rr.mid = scene.meshes[meid].material_id;
-                Vec3f n = vector_cross(b-a, c-b);
-                rr.n = vector_normalize(n);
+                //if ((t_intersect >= 0) && ((rr.t < 0) || (t_intersect < rr.t))) {
+                if ((t_intersect >= 0) && (t_intersect < rr.t)) {
+                    rr.t = t_intersect;
+                    rr.mid = scene.meshes[meid].material_id;
+                    Vec3f n = vector_cross(b-a, c-b);
+                    rr.n = vector_normalize(n);
+                }
             }
         }
     }
