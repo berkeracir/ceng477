@@ -12,7 +12,7 @@
             <Up>0 1 0</Up>
             <NearPlane>-0.12 0.12 -0.12 0.12</NearPlane>
             <NearDistance>1.8</NearDistance>
-            <ImageResolution>800 800</ImageResolution>
+            <ImageResolution>80 80</ImageResolution>
             <NumSamples>1</NumSamples>
             <ImageName>dragon_lowres.ppm</ImageName>
         </Camera>
