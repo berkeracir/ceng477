@@ -3,6 +3,9 @@
 
 #include "parser.h"
 #include "ray.h"
+#include <math.h>
+
+//float INFINITY = std::numeric_limits<float>::infinity();
 
 // t value for Ray and Triangle Intersection (use Barycentric Coordinates)
 // Inputs: Vec3f o, Vec3f d, Vec3f a, Vec3f b, Vec3f c

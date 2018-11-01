@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <math.h>
 
 typedef unsigned char RGB[3];
 
@@ -89,7 +90,7 @@ int main(int argc, char* argv[]) {
                 // Ray Form: r(t) = o + t.d
                 // where d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v)
                 Vec3f d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v);
-                float t = -1;
+                float t = INFINITY;
                 int mid;
                 Vec3f n;
 
@@ -100,7 +101,8 @@ int main(int argc, char* argv[]) {
 
                     float t_intersect = ray_sphere_intersection(e, d, c, radius);
 
-                    if ((t_intersect > 0) && (t == -1 || t_intersect == positive_min(t_intersect, t))) {
+                    //if ((t_intersect > 0) && (t == -1 || t_intersect == positive_min(t_intersect, t))) {
+                    if (t_intersect < t) {
                         t = t_intersect;
                         mid = scene.spheres[sid].material_id;
                         n = vector_normalize(e + t * d - c);
@@ -117,7 +119,8 @@ int main(int argc, char* argv[]) {
 
                     float t_intersect = ray_triangle_intersection(e, d, a, b, c);
 
-                    if ((t_intersect > 0) && (t == -1 || t_intersect == positive_min(t_intersect, t))) {
+                    //if ((t_intersect > 0) && (t == -1 || t_intersect == positive_min(t_intersect, t))) {
+                    if (t_intersect < t) {
                         t = t_intersect;
                         mid = scene.triangles[tid].material_id;
                         n = vector_normalize(vector_cross(b-a, c-b));
@@ -126,31 +129,34 @@ int main(int argc, char* argv[]) {
 
                 // Iterate through meshes
                 for (std::size_t meid = 0; meid < scene.meshes.size(); meid++) {
-                    Vec3f c = (max_mesh_vector[meid] + min_mesh_vector[meid]) * (1.0/2.0);
-                    float r = vector_magnitude(c - max_mesh_vector[meid]) + scene.shadow_ray_epsilon;
+                    if (is_ray_mesh_intersect(e, d, max_mesh_vector[meid], min_mesh_vector[meid])) {
+                        /*Vec3f c = (max_mesh_vector[meid] + min_mesh_vector[meid]) * (1.0/2.0);
+                        float r = vector_magnitude(c - max_mesh_vector[meid]) + scene.shadow_ray_epsilon;
 
-                    if (!is_ray_sphere_intersect(e, d, c, r))
-                        continue;
+                        if (!is_ray_sphere_intersect(e, d, c, r))
+                            continue;*/
 
-                    //Iterate through triangles in the mesh
-                    for (std::size_t fid = 0; fid < scene.meshes[meid].faces.size(); fid++) {
-                        Face face = scene.meshes[meid].faces[fid];
+                        //Iterate through triangles in the mesh
+                        for (std::size_t fid = 0; fid < scene.meshes[meid].faces.size(); fid++) {
+                            Face face = scene.meshes[meid].faces[fid];
 
-                        Vec3f a = scene.vertex_data[face.v0_id-1];
-                        Vec3f b = scene.vertex_data[face.v1_id-1];
-                        Vec3f c = scene.vertex_data[face.v2_id-1];
+                            Vec3f a = scene.vertex_data[face.v0_id-1];
+                            Vec3f b = scene.vertex_data[face.v1_id-1];
+                            Vec3f c = scene.vertex_data[face.v2_id-1];
 
-                        float t_intersect = ray_triangle_intersection(e, d, a, b, c);
+                            float t_intersect = ray_triangle_intersection(e, d, a, b, c);
 
-                        if ((t_intersect > 0) && (t == -1 || t_intersect == positive_min(t_intersect, t))) {
-                            t = t_intersect;
-                            mid = scene.meshes[meid].material_id;
-                            n = vector_normalize(vector_cross(b-a, c-b));
+                            //if ((t_intersect > 0) && (t == -1 || t_intersect == positive_min(t_intersect, t))) {
+                            if (t_intersect < t) {
+                                t = t_intersect;
+                                mid = scene.meshes[meid].material_id;
+                                n = vector_normalize(vector_cross(b-a, c-b));
+                            }
                         }
                     }
                 }
 
-                if (t < 0) {
+                if ((t == INFINITY) || (t < 0)) {
                     image[index++] = scene.background_color.x;
                     image[index++] = scene.background_color.y;
                     image[index++] = scene.background_color.z;
@@ -169,6 +175,8 @@ int main(int argc, char* argv[]) {
 
         // Output the Image Plane
         write_ppm(camera.image_name.c_str(), image, nx, ny);
+
+        delete[] image;
     }
 
    return 0;

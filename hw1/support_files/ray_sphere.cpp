@@ -1,5 +1,4 @@
 #include "ray_sphere.h"
-#include <math.h>
 
 bool is_ray_sphere_intersect(const parser::Vec3f &o, const parser::Vec3f &d, const parser::Vec3f &c, const float &r) {
     float A = vector_dot(d, d);
@@ -32,13 +31,13 @@ float ray_sphere_intersection(const parser::Vec3f &o, const parser::Vec3f &d, co
         float t1 = (-B + sqrt(delta))/(2*A);
         float t2 = (-B - sqrt(delta))/(2*A);
 
-        float result = std::min(std::max((float) 0, t1), std::max((float)0, t2));
+        float result = std::min(std::max((float) 0, t1), std::max((float) 0, t2));
 
         if (result > 0)
             return result;
         else
-            return -1;
+            return INFINITY;
     }
     else
-        return -1;
+        return INFINITY;
 }

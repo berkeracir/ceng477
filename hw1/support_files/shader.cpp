@@ -77,15 +77,16 @@ Ray reflection_ray(const Vec3f &o, const Vec3f &d, const Scene &scene) {
     Ray rr;
     rr.o = o;
     rr.d = d;
-    rr.t = -1;
-    float t = -1;
+    rr.t = INFINITY;
+    //float t = INFINITY;
 
     for (std::size_t sid = 0; sid < scene.spheres.size(); sid++) {
         Vec3f c = scene.vertex_data[scene.spheres[sid].center_vertex_id-1];
         float r = scene.spheres[sid].radius;
         float t_intersect = ray_sphere_intersection(o, d, c, r);
 
-        if ((t_intersect >= 0) && ((rr.t < 0) || (t_intersect < rr.t))) {
+        //if ((t_intersect >= 0) && ((rr.t < 0) || (t_intersect < rr.t))) {
+        if ((t_intersect >= 0) && (t_intersect < rr.t)) {
             rr.t = t_intersect;
             rr.mid = scene.spheres[sid].material_id;
             Vec3f n = rr.o + rr.t * rr.d - c;
@@ -102,7 +103,8 @@ Ray reflection_ray(const Vec3f &o, const Vec3f &d, const Scene &scene) {
 
         float t_intersect = ray_triangle_intersection(o, d, a, b, c);
 
-        if ((t_intersect >= 0) && ((rr.t < 0) || (t_intersect < rr.t))) {
+        //if ((t_intersect >= 0) && ((rr.t < 0) || (t_intersect < rr.t))) {
+        if ((t_intersect >= 0) && (t_intersect < rr.t)) {
             rr.t = t_intersect;
             rr.mid = scene.triangles[tid].material_id;
             Vec3f n = vector_cross(b-a, c-b);
@@ -120,7 +122,8 @@ Ray reflection_ray(const Vec3f &o, const Vec3f &d, const Scene &scene) {
 
             float t_intersect = ray_triangle_intersection(o, d, a, b, c);
 
-            if ((t_intersect >= 0) && ((rr.t < 0) || (t_intersect < rr.t))) {
+            //if ((t_intersect >= 0) && ((rr.t < 0) || (t_intersect < rr.t))) {
+            if ((t_intersect >= 0) && (t_intersect < rr.t)) {
                 rr.t = t_intersect;
                 rr.mid = scene.meshes[meid].material_id;
                 Vec3f n = vector_cross(b-a, c-b);
@@ -204,7 +207,7 @@ Vec3f specular_reflection(const Ray &ray, const Vec3f &coefficient, const Scene 
 }
 
 Vec3f get_color(const Ray &ray, const Scene &scene, int rec_depth) {
-    if (ray.t < 0) {
+    if ((ray.t == INFINITY) || (ray.t < 0)) {
         return Vec3f {(float) scene.background_color.x, (float) scene.background_color.y, (float) scene.background_color.z};
     }
     else {
