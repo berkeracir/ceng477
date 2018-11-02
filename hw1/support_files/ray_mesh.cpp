@@ -39,11 +39,11 @@ bool is_ray_mesh_intersect(const parser::Vec3f &o, const parser::Vec3f &d, const
     if ((tmin > tzmax) || (tzmin > tmax))
         return false;
 
-    if (tzmin > tmin)
+    /*if (tzmin > tmin)
         tmin = tzmin;
 
     if (tzmax < tmax)
-        tmax = tzmax;
+        tmax = tzmax;*/
 
     return true;
 }

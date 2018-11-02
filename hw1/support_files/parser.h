@@ -115,6 +115,11 @@ namespace parser
         std::vector<Triangle> triangles;
         std::vector<Sphere> spheres;
 
+	size_t sphere_count;
+        size_t triangle_count;
+        size_t mesh_count;
+        std::vector<size_t> mesh_face_count;
+
         std::vector<Vec3f> min_mesh_vector;
         std::vector<Vec3f> max_mesh_vector;
 
