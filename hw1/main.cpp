@@ -26,8 +26,6 @@ int main(int argc, char* argv[]) {
     for (std::size_t cid = 0; cid < scene.cameras.size(); cid++) {    // Actual Camera ID is cid+1
         Camera camera = scene.cameras[cid];
 
-        //std::cout << "Camera-" << cid+1 << std::endl << camera << std::endl;
-
         int nx = camera.image_width;
         int ny = camera.image_height;
 
@@ -39,9 +37,9 @@ int main(int argc, char* argv[]) {
         float d = camera.near_distance;
 
         Vec3f e = camera.position; // Camera position
-        Vec3f v = vector_normalize(camera.up); // Camera Up vector (v)
-        Vec3f w = vector_normalize(-camera.gaze); // Camera Opposite Gaze vector (w)
-        Vec3f u = vector_normalize(vector_cross(v, w)); // Camera Right vector (u)
+        Vec3f v = camera.up; // Camera Up vector (v)
+        Vec3f w = -camera.gaze; // Camera Opposite Gaze vector (w)
+        Vec3f u = vector_cross(v, w); // Camera Right vector (u)
         Vec3f m = (-w) * d; // Vector to middle of image plane from camera
         Vec3f q = m + l*u + t*v; // Vector to top left corner of image plane from camera
 
@@ -64,9 +62,7 @@ int main(int argc, char* argv[]) {
         }
 
         // Iterate through spheres
-        for (std::size_t sid = 0; sid < scene.spheres.size(); sid++) {
-            //std::cout << "Sphere-" << sid+1 << std::endl << scene.spheres[sid] << std::endl;
-            
+        for (std::size_t sid = 0; sid < scene.spheres.size(); sid++) {            
             Vec3f c = scene.vertex_data[scene.spheres[sid].center_vertex_id-1];
             float radius = scene.spheres[sid].radius;
 
@@ -77,9 +73,6 @@ int main(int argc, char* argv[]) {
             for (int row = 0; row < ny; row++) {
                 bool row_flag = false;
                 for (int col = 0; col < nx; col++) {
-                    // Ray Form: r(t) = o + t.d
-                    // where d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v)
-                    // Vec3f d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v);
                     float t = ray_sphere_intersection(rays[index].o, rays[index].d, c, radius);
 
                    if ((t > 0) && (rays[index].t == -1 || t == positive_min(t, rays[index].t))) {
@@ -109,8 +102,6 @@ int main(int argc, char* argv[]) {
 
         // Iterate through triangles
         for (std::size_t tid = 0; tid < scene.triangles.size(); tid++) {
-            //std::cout << "Triangle-" << tid+1 << std::endl << scene.triangles[tid] << std::endl;
-
             Face indice = scene.triangles[tid].indices;
             
             Vec3f a = scene.vertex_data[indice.v0_id-1];
@@ -120,13 +111,8 @@ int main(int argc, char* argv[]) {
             unsigned int index = 0;
 
             // Iterate through image plane (Width:nx, Height:ny)
-            //bool col_flag = false;
             for (int row = 0; row < ny; row++) {
-                //bool row_flag = false;
                 for (int col = 0; col < nx; col++) {
-                    // Ray Form: r(t) = o + t.d
-                    // where d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v)
-                    // Vec3f d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v);
                     float t = ray_triangle_intersection(rays[index].o, rays[index].d, a, b, c);
 
                     if ((t > 0) && (rays[index].t == -1 || t == positive_min(t, rays[index].t))) {
@@ -135,29 +121,16 @@ int main(int argc, char* argv[]) {
                         Vec3f n = vector_cross(b-a, c-b);
                         rays[index].n = vector_normalize(n);
                         index++;
-                        //row_flag = true;
                     }
                     else {
                         index++;
-
-                        /*if (row_flag) {
-                            index = (row+1) * nx;
-                            break;
-                        }*/
                     }
                 }
-
-                /*if (row_flag)
-                    col_flag = true;
-
-                else if (!row_flag && col_flag)
-                    break;*/
             }
         }
 
         // Iterate through meshes
         for (std::size_t meid = 0; meid < scene.meshes.size(); meid++) {
-
             //Iterate through triangles in the mesh
             for (std::size_t fid = 0; fid < scene.meshes[meid].faces.size(); fid++) {
                 Face face = scene.meshes[meid].faces[fid];
@@ -169,13 +142,8 @@ int main(int argc, char* argv[]) {
                 unsigned int index = 0;
 
                 // Iterate through image plane (Width:nx, Height:ny)
-                //bool col_flag = false;
                 for (int row = 0; row < ny; row++) {
-                    //bool row_flag = false;
                     for (int col = 0; col < nx; col++) {
-                        // Ray Form: r(t) = o + t.d
-                        // where d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v)
-                        // Vec3f d = q + (col+0.5)*pw*u + (row+0.5)*ph*(-v);
                         float t = ray_triangle_intersection(rays[index].o, rays[index].d, a, b, c);
 
                         if ((t > 0) && (rays[index].t == -1 || t == positive_min(t, rays[index].t))) {
@@ -184,23 +152,11 @@ int main(int argc, char* argv[]) {
                             Vec3f n = vector_cross(b-a, c-b);
                             rays[index].n = vector_normalize(n);
                             index++;
-                            //row_flag = true;
                         }
                         else {
                             index++;
-
-                            /*if (row_flag) {
-                                index = (row+1) * nx;
-                                break;
-                            }*/
                         }
                     }
-
-                    /*if (row_flag)
-                        col_flag = true;
-
-                    else if (!row_flag && col_flag)
-                        break;*/
                 }
             }
         }
@@ -217,6 +173,9 @@ int main(int argc, char* argv[]) {
 
         // Output the Image Plane
         write_ppm(camera.image_name.c_str(), image, nx, ny);
+
+        delete[] image;
+        delete[] rays;
     }
 
    return 0;
