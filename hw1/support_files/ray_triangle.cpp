@@ -30,10 +30,7 @@ float ray_triangle_intersection(const parser::Vec3f &o, const parser::Vec3f &d, 
     MATRIX matrix_A = {a-b, a-c, d};
     float det_matrix_A = matrix3_determinant(matrix_A);
 
-    MATRIX matrix_T = {a-b, a-c, a-o};
-    float t = matrix3_determinant(matrix_T)/det_matrix_A;
-    if (t <= 0)
-        return INFINITY;
+    
 
     MATRIX matrix_B = {a-o, a-c, d};
     float B = matrix3_determinant(matrix_B)/det_matrix_A;
@@ -43,6 +40,11 @@ float ray_triangle_intersection(const parser::Vec3f &o, const parser::Vec3f &d, 
     MATRIX matrix_C = {a-b, a-o, d};
     float C = matrix3_determinant(matrix_C)/det_matrix_A;
     if ((C < 0 - global_shadow_ray_epsilon) || (B+C > 1 + global_shadow_ray_epsilon))
+        return INFINITY;
+
+    MATRIX matrix_T = {a-b, a-c, a-o};
+    float t = matrix3_determinant(matrix_T)/det_matrix_A;
+    if (t <= 0)
         return INFINITY;
     
     return t;
