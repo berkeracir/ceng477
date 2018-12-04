@@ -3,6 +3,9 @@
 
 #include "parser.h"
 #include "ray.h"
+#include <math.h>
+
+//float INFINITY = std::numeric_limits<float>::infinity();
 
 // Check whether ray and sphere intersects
 // Inputs: Vec3f o, Vec3f d, Vec3f c, float r

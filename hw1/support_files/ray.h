@@ -3,6 +3,9 @@
 
 #include "parser.h"
 #include <vector>
+#include <math.h>
+
+//float INFINITY = std::numeric_limits<float>::infinity();
 
 // Ray struct that represents:
 //  r(t) = o + t.d
