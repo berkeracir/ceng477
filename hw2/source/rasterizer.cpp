@@ -52,23 +52,7 @@ void initializeImage(Camera cam) {
 
         }
 }
-/*
-Gets two parameters, first one transformation matrix
-second one is the vector that needed to be transformed
-It return new vector after transformation.
 
-Vec3 transformVector(double transformMatrix[4][4], const Vec3 &vector){
-    Vec3 newVector;
-    double vectorMatrix[4] = {vector.x, vector.y, vector.z, 0};
-    double resultMatrix[4];
-    multiplyMatrixWithVec4d(resultMatrix, transformMatrix, vectorMatrix);
-    newVector.x = resultMatrix[0];
-    newVector.y = resultMatrix[1];
-    newVector.z = resultMatrix[2];
-    return newVector;
-}
-*/
-////////////
 
 /*
 Gets two parameters, first one transformation matrix
