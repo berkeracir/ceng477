@@ -233,8 +233,8 @@ void scale(double M_scale[4][4], Scaling s) {
 }
 
 void rotate(double M_rotate[4][4], Rotation r) {
-    double theta = r.angle * M_PI / (double) 180;
-    Vec3 u = {r.ux, r.uy, r.uz};
+    double theta = r.angle * M_PI / 180;
+    Vec3 u; u.x = r.ux; u.y = r.uy; u.z = r.uz;
     Vec3 v, w;
 
     if (abs(u.x) <= abs(u.y) && abs(u.x) <= abs(u.z)) {
@@ -257,21 +257,21 @@ void rotate(double M_rotate[4][4], Rotation r) {
     v = normalizeVec3(v);
     w = crossProductVec3(u, v);
 
-    double M_inverse[4][4] = {
+    double M[4][4] = {
         {u.x, u.y, u.z, 0},
         {v.x, v.y, v.z, 0},
         {w.x, w.y, w.z, 0},
         {0,   0,   0,   1}
     };
 
-    double M[4][4] = {
+    double M_i[4][4] = {
         {u.x, v.x, w.x, 0},
-        {u.y, v.y, w.z, 0},
+        {u.y, v.y, w.y, 0},
         {u.z, v.z, w.z, 0},
         {0,   0,   0,   1}
     };
 
-    double M_rotation[4][4] = {
+    double R[4][4] = {
         {1,          0,           0, 0},
         {0, cos(theta), -sin(theta), 0},
         {0, sin(theta),  cos(theta), 0},
@@ -279,7 +279,7 @@ void rotate(double M_rotate[4][4], Rotation r) {
     };
 
     double m[4][4];
-    multiplyMatrixWithMatrix(m, M_inverse, M_rotation);
+    multiplyMatrixWithMatrix(m, M_i, R);
     multiplyMatrixWithMatrix(M_rotate, m, M);
 }
 void model_transformation(double M_model[4][4], int model_id) {;}
