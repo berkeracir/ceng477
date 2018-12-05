@@ -306,6 +306,7 @@ Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], 
     result_vec.x = result[0];
     result_vec.y = result[1];
     result_vec.z = result[2];
+    result_vec.colorId = v.colorId;
 
     return result_vec;
 }
