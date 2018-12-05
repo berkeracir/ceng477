@@ -79,14 +79,12 @@ void forwardRenderingPipeline(Camera cam) {
     for (int i=0; i<numberOfModels; i++) {
         double M_model[4][4];
         model_transformation(M_model, i);
-        double M_l2w[3][4]; // TODO M_l2w * M_model M34 * M44
 
         for (int j=0; j<models[i].numberOfTriangles; j++) {
             int vertex_id_0 = models[i].triangles[j].vertexIds[0];
             int vertex_id_1 = models[i].triangles[j].vertexIds[1];
             int vertex_id_2 = models[i].triangles[j].vertexIds[2];
 
-            // TODOs: M34 x M41 (vertex) => Vec3 transform_point(double transformMatrix[3][4], Vec3 point)
             world_vertices[vertex_id_0] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_0]);
             world_vertices[vertex_id_1] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_1]);
             world_vertices[vertex_id_2] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_2]);
