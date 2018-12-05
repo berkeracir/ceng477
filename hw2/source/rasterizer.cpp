@@ -60,6 +60,8 @@ void rotate(double M_rotate[4][4], Rotation r);
 void model_transformation(double M_model[4][4], Model const &model);
 Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], double M_model[4][4], Vec3 v);
 
+void draw_triangle(Vec3 v_1, Vec3 v_2, Vec3 v_3, int model_type);
+
 
 /*
 	Transformations, culling, rasterization are done here.
@@ -89,16 +91,12 @@ void forwardRenderingPipeline(Camera cam) {
             /*world_vertices[vertex_id_0] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_0]);
             world_vertices[vertex_id_1] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_1]);
             world_vertices[vertex_id_2] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_2]);*/
+            Vec3 v_1 = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_0]);
+            Vec3 v_2 = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_1]);
+            Vec3 v_3 = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_2]);
 
-            printVec3(vertices[vertex_id_0]);
-            printVec3(transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_0]));
-            printf("---\n");
-            printVec3(vertices[vertex_id_1]);
-            printVec3(transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_1]));
-            printf("---\n");
-            printVec3(vertices[vertex_id_2]);
-            printVec3(transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_2]));
-            printf("---\n---\n");
+            // TODO: check BACKFACE CULLING!
+            draw_triangle(v_1, v_2, v_3, model.type);
         }
     }
 }
@@ -167,7 +165,7 @@ int main(int argc, char **argv) {
 // Helper Function Definitions
 void multiply_M34WithVec4d(double r[3], double m[3][4], double v[4]);
 void assign_matrix(double lhs[4][4], double rhs[4][4]);
-
+void draw_line(Vec3 a, Vec3 b);
 
 void viewport_transformation(double result[3][4], Camera cam) {
     double assing[3][4] = {
@@ -334,13 +332,6 @@ Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], 
     multiplyMatrixWithMatrix(M_per_cam_model, M_per_cam, M_model);
     multiplyMatrixWithVec4d(M_pdivide, M_per_cam_model, vectorMatrix);
 
-    /*for (int i=0; i<4; i++) {
-        printf("\t\t");
-        for (int j=0; j<4; j++)
-            printf("%f ", M_model[i][j]);
-        printf("\n");
-    }*/
-
     // Perspective Divide
     M_pdivide[0] /=  M_pdivide[3];
     M_pdivide[1] /= M_pdivide[3];
@@ -355,6 +346,14 @@ Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], 
     result_vec.colorId = v.colorId;
 
     return result_vec;
+}
+
+void draw_triangle(Vec3 v_1, Vec3 v_2, Vec3 v_3, int model_type) {
+    // TODO check model_type
+
+    draw_line(v_1,v_2);
+    draw_line(v_2,v_3);
+    draw_line(v_3,v_1);
 }
 
 // Helper Functions
@@ -378,6 +377,29 @@ void assign_matrix(double lhs[4][4], double rhs[4][4]){
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             lhs[i][j] = rhs[i][j];
+        }
+    }
+}
+
+void draw_line(Vec3 a, Vec3 b) {
+    double m = atan2(b.y-a.y, b.x-a.x);
+    printf("m: %f\n", m);
+    if (m >= 0) {
+        int y = (int) a.y;
+        double d = (a.y - b.y) + 0.5 * (b.x - a.x);
+        Color c = colors[a.colorId];
+        //Color dc = ()/()
+        for (int x = (int) a.x; x <= (int) b.x; x++) {
+            printf("%d %d\n", x, y);
+            image[x][y] = c;
+
+            if (d < 0) {
+                y += 1;
+                d += (a.y - b.y) + (b.x - a.x);
+            }
+            else {
+                d += (a.y - b.y);
+            }
         }
     }
 }
