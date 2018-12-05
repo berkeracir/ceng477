@@ -167,8 +167,35 @@ void viewport_transformation(double result[3][4], Camera cam) {
         }
     }
 }
-void perspective_transformation(double result[4][4], Camera cam) {;}
-void camera_transformation(double result[4][4], Camera cam) {;}
+void perspective_transformation(double result[4][4], Camera cam) {
+    double assing[4][4] = {
+        {(2 * cam.n) / (cam.r - cam.l), 0, (cam.r + cam.l) / (cam.r - cam.l), 0},
+        {0, (2 * cam.n) / (cam.t - cam.b), (cam.t + cam.b) / (cam.t - cam.b), 0},
+        {0, 0, -(cam.f + cam.n) / (cam.f - cam.n), -(2 * cam.f * cam.n) / (cam.f - cam.n)},
+        {0, 0, -1, 0}
+    };
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            result[i][j] = assing[i][j];
+        }
+    }
+}
+
+void camera_transformation(double result[4][4], Camera cam) {
+    double assing[4][4] = {
+        {cam.u.x, cam.u.y, cam.u.z, -(cam.u.x * cam.pos.x + cam.u.y * cam.pos.y + cam.u.z * cam.pos.z)},
+        {cam.v.x, cam.v.y, cam.v.z, -(cam.v.x * cam.pos.x + cam.v.y * cam.pos.y + cam.v.z * cam.pos.z)},
+        {cam.w.x, cam.w.y, cam.w.z, -(cam.w.x * cam.pos.x + cam.w.y * cam.pos.y + cam.w.z * cam.pos.z)},
+        {0, 0, 0, 1}
+    };
+    
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            result[i][j] = assing[i][j];
+        }
+    }
+}
 
 void translate(double M_translate[4][4], Translation t) {
     double translation_matrix[4][4] = {
