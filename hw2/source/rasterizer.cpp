@@ -59,6 +59,7 @@ void translate(double M_translate[4][4], Translation t);
 void scale(double M_scale[4][4], Scaling s);
 void rotate(double M_rotate[4][4], Rotation r);
 void model_transformation(double M_model[4][4], int model_id);
+Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], double M_model[4][4], Vec3 v);
 
 /*
 	Transformations, culling, rasterization are done here.
@@ -73,20 +74,25 @@ void forwardRenderingPipeline(Camera cam) {
     double M_cam[4][4];
     camera_transformation(M_cam, cam);
 
-    double M_l2w[3][4];
-    local_to_world(M_l2w, M_vp, M_per, M_cam);
+    double M_world[3][4];
+    local_to_world(M_world, M_vp, M_per, M_cam);
 
     Vec3 world_vertices[100000];
 
     for (int i=0; i<numberOfModels; i++) {
         double M_model[4][4];
         model_transformation(M_model, i);
-        // M_l2w = M_l2w * M_model; TODO
+        double M_l2w[3][4]; // TODO M_l2w * M_model M34 * M44
 
         for (int j=0; j<models[i].numberOfTriangles; j++) {
-            models[i].triangles[j].vertexIds[0];
-            models[i].triangles[j].vertexIds[1];
-            models[i].triangles[j].vertexIds[2];
+            int vertex_id_0 = models[i].triangles[j].vertexIds[0];
+            int vertex_id_1 = models[i].triangles[j].vertexIds[1];
+            int vertex_id_2 = models[i].triangles[j].vertexIds[2];
+
+            // TODOs: M34 x M41 (vertex) => Vec3 transform_point(double transformMatrix[3][4], Vec3 point)
+            world_vertices[vertex_id_0] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_0]);
+            world_vertices[vertex_id_1] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_1]);
+            world_vertices[vertex_id_2] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_2]);
         }
     }
 }
@@ -150,4 +156,16 @@ int main(int argc, char **argv) {
 
     return 0;
 
+}
+
+void viewport_transformation(double result[4][4], Camera cam) {;}
+void perspective_transformation(double result[4][4], Camera cam) {;}
+void camera_transformation(double result[4][4], Camera cam) {;}
+void local_to_world(double result[3][4], double M_vp[3][4], double M_per[4][4], double M_cam[4][4]) {;}
+void translate(double M_translate[4][4], Translation t) {;}
+void scale(double M_scale[4][4], Scaling s) {;}
+void rotate(double M_rotate[4][4], Rotation r) {;}
+void model_transformation(double M_model[4][4], int model_id) {;}
+Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], double M_model[4][4], Vec3 v) {
+    return Vec3 {0, 0, 0};
 }
