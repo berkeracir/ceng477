@@ -86,9 +86,19 @@ void forwardRenderingPipeline(Camera cam) {
             int vertex_id_1 = model.triangles[j].vertexIds[1];
             int vertex_id_2 = model.triangles[j].vertexIds[2];
 
-            world_vertices[vertex_id_0] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_0]);
+            /*world_vertices[vertex_id_0] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_0]);
             world_vertices[vertex_id_1] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_1]);
-            world_vertices[vertex_id_2] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_2]);
+            world_vertices[vertex_id_2] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_2]);*/
+
+            printVec3(vertices[vertex_id_0]);
+            printVec3(transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_0]));
+            printf("---\n");
+            printVec3(vertices[vertex_id_1]);
+            printVec3(transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_1]));
+            printf("---\n");
+            printVec3(vertices[vertex_id_2]);
+            printVec3(transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_2]));
+            printf("---\n---\n");
         }
     }
 }
@@ -283,26 +293,30 @@ void rotate(double M_rotate[4][4], Rotation r) {
     multiplyMatrixWithMatrix(M_rotate, m, M);
 }
 void model_transformation(double M_model[4][4], Model const &model) {
-    double result[4][4];
-    makeIdentityMatrix(result);
+    makeIdentityMatrix(M_model);
 
     for (int i=0; i<model.numberOfTransformations; i++) {
         double tmp[4][4];
-        assign_matrix(tmp, result);
+        double result[4][4];
+        assign_matrix(result, M_model);
+
         if (model.transformationTypes[i] == 't') {
             int translation_id = model.transformationIDs[i];
-
+            translate(tmp, translations[translation_id]);
+            multiplyMatrixWithMatrix(M_model, tmp, result);
         }
         else if (model.transformationTypes[i] == 's') {
             int scaling_id = model.transformationIDs[i];
-
+            scale(tmp, scalings[scaling_id]);
+            multiplyMatrixWithMatrix(M_model, tmp, result);
         }
         else if (model.transformationTypes[i] == 'r') {
             int rotation_id = model.transformationIDs[i];
-
+            rotate(tmp, rotations[rotation_id]);
+            multiplyMatrixWithMatrix(M_model, tmp, result);
         }
         else {
-            printf("BUG! BUG! BUG! BUG! BUG! BUG! BUG! BUG!\n")
+            printf("BUG! BUG! BUG! BUG! BUG! BUG! BUG! BUG!\n");
         }
     }
 }
@@ -319,6 +333,13 @@ Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], 
     multiplyMatrixWithMatrix(M_per_cam, M_per, M_cam);
     multiplyMatrixWithMatrix(M_per_cam_model, M_per_cam, M_model);
     multiplyMatrixWithVec4d(M_pdivide, M_per_cam_model, vectorMatrix);
+
+    /*for (int i=0; i<4; i++) {
+        printf("\t\t");
+        for (int j=0; j<4; j++)
+            printf("%f ", M_model[i][j]);
+        printf("\n");
+    }*/
 
     // Perspective Divide
     M_pdivide[0] /=  M_pdivide[3];
@@ -350,5 +371,13 @@ void multiply_M34WithVec4d(double r[3], double m[3][4], double v[4]) {
         }
 
         r[i] = total;
+    }
+}
+
+void assign_matrix(double lhs[4][4], double rhs[4][4]){
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            lhs[i][j] = rhs[i][j];
+        }
     }
 }
