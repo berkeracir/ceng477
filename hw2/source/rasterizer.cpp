@@ -60,6 +60,7 @@ void rotate(double M_rotate[4][4], Rotation r);
 void model_transformation(double M_model[4][4], int model_id);
 Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], double M_model[4][4], Vec3 v);
 
+
 /*
 	Transformations, culling, rasterization are done here.
 	You can define helper functions inside this file (rasterizer.cpp) only.
@@ -154,6 +155,12 @@ int main(int argc, char **argv) {
 
 }
 
+//Helper Function Templates
+
+//Multiply matrices -> m[3][4] * v[4][1] = r[3][1]
+void multiply_M34WithVec4d(double r[3], double m[3][4], double v[4]);
+
+
 void viewport_transformation(double result[3][4], Camera cam) {
     double assing[3][4] = {
         {cam.sizeX / 2, 0, 0, (cam.sizeX - 1) / 2},
@@ -229,5 +236,39 @@ void scale(double M_scale[4][4], Scaling s) {
 void rotate(double M_rotate[4][4], Rotation r) {;}
 void model_transformation(double M_model[4][4], int model_id) {;}
 Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], double M_model[4][4], Vec3 v) {
-    return Vec3 {0, 0, 0};
+    double vectorMatrix[4] = {v.x, v.y, v.z, 1};
+    double M_per_cam[4][4];
+    double M_per_cam_model[4][4];
+    double M_pdivide[4];
+    double result[3];
+    Vec3 result_vec;
+    multiplyMatrixWithMatrix(M_per_cam, M_per, M_cam);
+    multiplyMatrixWithMatrix(M_per_cam_model, M_per_cam, M_model);
+    multiplyMatrixWithVec4d(M_pdivide, M_per_cam_model, vectorMatrix);
+    M_pdivide[0] /=  M_pdivide[3];
+    M_pdivide[1] /= M_pdivide[3];
+    M_pdivide[2] /= M_pdivide[3];
+    M_pdivide[3] /= M_pdivide[3];
+    multiply_M34WithVec4d(result, M_vp, M_pdivide);
+    result_vec.x = result[0];
+    result_vec.y = result[1];
+    result_vec.z = result[2];
+
+    return result_vec;
+}
+
+
+
+//HELPER FUNCTIONS
+
+//Multiply matrices -> m[3][4] * v[4][1] = r[3][1]
+void multiply_M34WithVec4d(double r[3], double m[3][4], double v[4]) {
+    int i, j;
+    double total;
+    for (i = 0; i < 3; i++) {
+        total = 0;
+        for (j = 0; j < 4; j++)
+            total += m[i][j] * v[j];
+        r[i] = total;
+    }
 }
