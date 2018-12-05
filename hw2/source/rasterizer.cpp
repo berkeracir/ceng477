@@ -155,6 +155,7 @@ int main(int argc, char **argv) {
 
 // Helper Function Definitions
 void multiply_M34WithVec4d(double r[3], double m[3][4], double v[4]);
+void assign_matrix(double lhs[4][4], double rhs[4][4]);
 
 
 void viewport_transformation(double result[3][4], Camera cam) {
@@ -280,7 +281,32 @@ void rotate(double M_rotate[4][4], Rotation r) {
     multiplyMatrixWithMatrix(m, M_i, R);
     multiplyMatrixWithMatrix(M_rotate, m, M);
 }
-void model_transformation(double M_model[4][4], int model_id) {;}
+void model_transformation(double M_model[4][4], int model_id) {
+    Model model = models[i];
+
+    double result[4][4];
+    makeIdentityMatrix(result);
+
+    for (int i=0; i<model.numberOfTransformations; i++) {
+        double tmp[4][4];
+        assign_matrix(tmp, result);
+        if (model.transformationTypes[i] == 't') {
+            int translation_id = model.transformationIDs[i];
+
+        }
+        else if (model.transformationTypes[i] == 's') {
+            int scaling_id = model.transformationIDs[i];
+
+        }
+        else if (model.transformationTypes[i] == 'r') {
+            int rotation_id = model.transformationIDs[i];
+
+        }
+        else {
+            printf("BUG! BUG! BUG! BUG! BUG! BUG! BUG! BUG!\n")
+        }
+    }
+}
 
 Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], double M_model[4][4], Vec3 v) {
     double vectorMatrix[4] = {v.x, v.y, v.z, 1};
