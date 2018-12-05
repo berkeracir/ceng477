@@ -1,6 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
-#include <cmath>
+#include <math.h>
 #include <cstring>
 #include "hw2_types.h"
 #include "hw2_math_ops.h"
@@ -233,7 +233,57 @@ void scale(double M_scale[4][4], Scaling s) {
         }
     }
 }
-void rotate(double M_rotate[4][4], Rotation r) {;}
+
+void rotate(double M_rotate[4][4], Rotation r) {
+    double theta = r.angle * M_PI / (double) 180;
+    Vec3 u = {r.ux, r.uy, r.uz};
+    Vec3 v, w;
+
+    if (abs(u.x) <= abs(u.y) && abs(u.x) <= abs(u.z)) {
+        v.x = 0;
+        v.y = -u.z;
+        v.z = u.y;
+    }
+    else if (abs(u.y) <= abs(u.x) && abs(u.y) <= abs(u.z)) {
+        v.x = -u.z;
+        v.y = 0;
+        v.z = u.x;
+    }
+    else { // (abs(u.z) <= abs(u.x) && abs(u.z) <= abs(u.y)) 
+        v.x = -u.y;
+        v.y = u.x;
+        v.z = 0;
+    }
+
+    u = normalizeVec3(u);
+    v = normalizeVec3(v);
+    w = crossProductVec3(u, v);
+
+    double M_inverse[4][4] = {
+        {u.x, u.y, u.z, 0},
+        {v.x, v.y, v.z, 0},
+        {w.x, w.y, w.z, 0},
+        {0,   0,   0,   1}
+    };
+
+    double M[4][4] = {
+        {u.x, v.x, w.x, 0},
+        {u.y, v.y, w.z, 0},
+        {u.z, v.z, w.z, 0},
+        {0,   0,   0,   1}
+    };
+
+    double M_rotation[4][4] = {
+        {1,          0,           0, 0},
+        {0, cos(theta), -sin(theta), 0},
+        {0, sin(theta),  cos(theta), 0},
+        {0,           0,          0, 1}
+    };
+
+    double m[4][4];
+    multiplyMatrixWithMatrix(m, M_inverse, M_rotation);
+    multiplyMatrixWithMatrix(M_rotate, m, M);
+}
 void model_transformation(double M_model[4][4], int model_id) {;}
 Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], double M_model[4][4], Vec3 v) {
     double vectorMatrix[4] = {v.x, v.y, v.z, 1};
