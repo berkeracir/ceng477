@@ -57,7 +57,7 @@ void camera_transformation(double result[4][4], Camera cam);
 void translate(double M_translate[4][4], Translation t);
 void scale(double M_scale[4][4], Scaling s);
 void rotate(double M_rotate[4][4], Rotation r);
-void model_transformation(double M_model[4][4], int model_id);
+void model_transformation(double M_model[4][4], Model const &model);
 Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], double M_model[4][4], Vec3 v);
 
 
@@ -77,13 +77,14 @@ void forwardRenderingPipeline(Camera cam) {
     Vec3 world_vertices[100000];
 
     for (int i=0; i<numberOfModels; i++) {
+        Model model = models[i];
         double M_model[4][4];
-        model_transformation(M_model, i);
+        model_transformation(M_model, model);
 
-        for (int j=0; j<models[i].numberOfTriangles; j++) {
-            int vertex_id_0 = models[i].triangles[j].vertexIds[0];
-            int vertex_id_1 = models[i].triangles[j].vertexIds[1];
-            int vertex_id_2 = models[i].triangles[j].vertexIds[2];
+        for (int j=0; j<model.numberOfTriangles; j++) {
+            int vertex_id_0 = model.triangles[j].vertexIds[0];
+            int vertex_id_1 = model.triangles[j].vertexIds[1];
+            int vertex_id_2 = model.triangles[j].vertexIds[2];
 
             world_vertices[vertex_id_0] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_0]);
             world_vertices[vertex_id_1] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_1]);
@@ -281,9 +282,7 @@ void rotate(double M_rotate[4][4], Rotation r) {
     multiplyMatrixWithMatrix(m, M_i, R);
     multiplyMatrixWithMatrix(M_rotate, m, M);
 }
-void model_transformation(double M_model[4][4], int model_id) {
-    Model model = models[i];
-
+void model_transformation(double M_model[4][4], Model const &model) {
     double result[4][4];
     makeIdentityMatrix(result);
 
