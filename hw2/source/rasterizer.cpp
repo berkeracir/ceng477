@@ -54,7 +54,6 @@ void initializeImage(Camera cam) {
 void viewport_transformation(double result[4][4], Camera cam);
 void perspective_transformation(double result[4][4], Camera cam);
 void camera_transformation(double result[4][4], Camera cam);
-void local_to_world(double result[3][4], double M_vp[3][4], double M_per[4][4], double M_cam[4][4]);
 void translate(double M_translate[4][4], Translation t);
 void scale(double M_scale[4][4], Scaling s);
 void rotate(double M_rotate[4][4], Rotation r);
@@ -73,9 +72,6 @@ void forwardRenderingPipeline(Camera cam) {
     perspective_transformation(M_per, cam);
     double M_cam[4][4];
     camera_transformation(M_cam, cam);
-
-    double M_world[3][4];
-    local_to_world(M_world, M_vp, M_per, M_cam);
 
     Vec3 world_vertices[100000];
 
@@ -161,7 +157,6 @@ int main(int argc, char **argv) {
 void viewport_transformation(double result[4][4], Camera cam) {;}
 void perspective_transformation(double result[4][4], Camera cam) {;}
 void camera_transformation(double result[4][4], Camera cam) {;}
-void local_to_world(double result[3][4], double M_vp[3][4], double M_per[4][4], double M_cam[4][4]) {;}
 void translate(double M_translate[4][4], Translation t) {;}
 void scale(double M_scale[4][4], Scaling s) {;}
 void rotate(double M_rotate[4][4], Rotation r) {;}
