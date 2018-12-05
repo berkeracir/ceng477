@@ -51,7 +51,7 @@ void initializeImage(Camera cam) {
         }
 }
 
-void viewport_transformation(double result[4][4], Camera cam);
+void viewport_transformation(double result[3][4], Camera cam);
 void perspective_transformation(double result[4][4], Camera cam);
 void camera_transformation(double result[4][4], Camera cam);
 void translate(double M_translate[4][4], Translation t);
@@ -154,7 +154,19 @@ int main(int argc, char **argv) {
 
 }
 
-void viewport_transformation(double result[4][4], Camera cam) {;}
+void viewport_transformation(double result[3][4], Camera cam) {
+        double assing[3][4] = {
+        {cam.sizeX / 2, 0, 0, (cam.sizeX - 1) / 2},
+        {0, cam.sizeY / 2, 0, (cam.sizeY - 1) / 2},
+        {0, 0, 0.5, 0.5}
+    };
+
+    for(int i = 0; i < 3; i++){
+        for(int j = 0; j < 4; j++){
+            result[i][j] = assing[i][j];
+        }
+    };
+}
 void perspective_transformation(double result[4][4], Camera cam) {;}
 void camera_transformation(double result[4][4], Camera cam) {;}
 void translate(double M_translate[4][4], Translation t) {;}
