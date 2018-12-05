@@ -155,33 +155,50 @@ int main(int argc, char **argv) {
 }
 
 void viewport_transformation(double result[3][4], Camera cam) {
-        double assing[3][4] = {
+    double assing[3][4] = {
         {cam.sizeX / 2, 0, 0, (cam.sizeX - 1) / 2},
         {0, cam.sizeY / 2, 0, (cam.sizeY - 1) / 2},
         {0, 0, 0.5, 0.5}
     };
 
-    for(int i = 0; i < 3; i++){
-        for(int j = 0; j < 4; j++){
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 4; j++) {
             result[i][j] = assing[i][j];
         }
-    };
+    }
 }
 void perspective_transformation(double result[4][4], Camera cam) {;}
 void camera_transformation(double result[4][4], Camera cam) {;}
+
 void translate(double M_translate[4][4], Translation t) {
-    double translate_matrix[4][4] = {
+    double translation_matrix[4][4] = {
         {1, 0, 0, t.tx},
         {0, 1, 0, t.ty},
         {0, 0, 1, t.tz},
         {0, 0, 0, 1}
     };
 
-    for (int i=0; i<4; i++)
-        for (int j=0; j<4; j++)
-            M_translate[i][j] = translate_matrix[i][j];
+    for (int i=0; i<4; i++) {
+        for (int j=0; j<4; j++) {
+            M_translate[i][j] = translation_matrix[i][j];
+        }
+    }
 }
-void scale(double M_scale[4][4], Scaling s) {;}
+
+void scale(double M_scale[4][4], Scaling s) {
+    double scaling_matrix[4][4] = {
+        {s.sx, 0,    0,    0},
+        {0,    s.sy, 0,    0},
+        {0,    0,    s.sz, 0},
+        {0,    0,    0,    1}
+    };
+
+    for (int i=0; i<4; i++) {
+        for (int j=0; j<4; j++) {
+            M_scale[i][j] = scaling_matrix[i][j];
+        }
+    }
+}
 void rotate(double M_rotate[4][4], Rotation r) {;}
 void model_transformation(double M_model[4][4], int model_id) {;}
 Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], double M_model[4][4], Vec3 v) {
