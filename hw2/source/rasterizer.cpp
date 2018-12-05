@@ -53,6 +53,7 @@ void initializeImage(Camera cam) {
         }
 }
 
+
 /*
 Gets two parameters, first one transformation matrix
 second one is the point that needed to be transformed
@@ -70,58 +71,53 @@ Vec3 transfromPoint(double transformMatrix[4][4], const Vec3 &point){
 }
 
 /*
-Gets two parameters, first one transformation matrix
-second one is the vector that needed to be transformed
-It return new vector after transformation.
-*/
-Vec3 transformVector(double transformMatrix[4][4], const Vec3 &vector){
-    Vec3 newVector;
-    double vectorMatrix[4] = {vector.x, vector.y, vector.z, 0};
-    double resultMatrix[4];
-    multiplyMatrixWithVec4d(resultMatrix, transformMatrix, vectorMatrix);
-    newVector.x = resultMatrix[0];
-    newVector.y = resultMatrix[1];
-    newVector.z = resultMatrix[2];
-    return newVector;
+ * Multiply matrices m1 (double[3][4]) and m2 (double[4][4]) and store the result in result matrix r (double[3][4]).
+ */
+void multiplyMWM(double r[3][4], double m1[3][4], double m2[4][4]) {
+    int i, j, k;
+    double total;
+
+    for (i = 0; i < 3; i++)
+        for (j = 0; j < 4; j++) {
+            total = 0;
+            for (k = 0; k < 4; k++)
+                total += m1[i][k] * m2[k][j];
+            r[i][j] = total;
+        }
 }
 
-
 /*
-It gets one parameter: Camera
-It transforms the camera to the origin which is in the 
-canonical viewing volume (CVV).
-It uses tranformation functions which are transformation of vectors
-and transformation of points
-*/
-Camera getNewCamera(const Camera &cam){
-    Camera newCam;
-    newCam.cameraId = cam.cameraId;
-    /*This tranformation matrix taken from following link
-    http://saksagan.ceng.metu.edu.tr/courses/ceng477/files/pdf/week_06.pdf
-    page 8
-    */
-    double transformMatrix[4][4] = {
+This function gets camera and result matrix which is empty for initial
+After calculating last transformation matrix, it stores the result in resultMatrix*/
+void getM_l2w(Camera cam, double resultMatrix[3][4]){
+    //This is camera transformation matrix
+    double M_cam[4][4] = {
         {cam.u.x, cam.u.y, cam.u.z, -(cam.u.x * cam.pos.x + cam.u.y * cam.pos.y + cam.u.z * cam.pos.z)},
         {cam.v.x, cam.v.y, cam.v.z, -(cam.v.x * cam.pos.x + cam.v.y * cam.pos.y + cam.v.z * cam.pos.z)},
         {cam.w.x, cam.w.y, cam.w.z, -(cam.w.x * cam.pos.x + cam.w.y * cam.pos.y + cam.w.z * cam.pos.z)},
         {0, 0, 0, 1}
     };
-    newCam.pos = transfromPoint(transformMatrix, cam.pos);
-    newCam.gaze = transformVector(transformMatrix, cam.gaze);
-    newCam.u = transformVector(transformMatrix, cam.u);
-    newCam.v = transformVector(transformMatrix, cam.v);
-    newCam.w = transformVector(transformMatrix, cam.w);
-    /*for l, r, b, t, n, f
-    http://saksagan.ceng.metu.edu.tr/courses/ceng477/files/pdf/week_06.pdf
-    page 16
-    */
-    newCam.n = newCam.r = newCam.t = 1;
-    newCam.l = newCam.b = newCam.f = -1;
-    newCam.sizeX = cam.sizeX;
-    newCam.sizeY = cam.sizeY;
-    strcpy(newCam.outputFileName, cam.outputFileName);
-    return newCam;
+    //This is perspective transformation matrix
+    double M_per[4][4] = {
+        {(2 * cam.n) / (cam.r - cam.l), 0, (cam.r + cam.l) / (cam.r - cam.l), 0},
+        {0, (2 * cam.n) / (cam.t - cam.b), (cam.t + cam.b) / (cam.t - cam.b), 0},
+        {0, 0, -(cam.f + cam.n) / (cam.f - cam.n), -(2 * cam.f * cam.n) / (cam.f - cam.n)},
+        {0, 0, -1, 0}
+    };
+    //This is viewport transformation matrix
+    double M_vp[3][4] = {
+        {cam.sizeX / 2, 0, 0, (cam.sizeX -1) / 2},
+        {0, cam.sizeY / 2, 0, (cam.sizeY -1) / 2},
+        {0, 0, 0.5, 0.5}
+    };
+
+    double M_per_cam[4][4];
+    // M_vp * M_per * M_cam = Transform matrix which can transform vertices to the viewing volume
+    multiplyMatrixWithMatrix;(M_per_cam, M_per, M_cam);
+    multiplyMWM(resultMatrix, M_vp, M_per_cam);
 }
+
+
 
 /*
 	Transformations, culling, rasterization are done here.
@@ -129,7 +125,10 @@ Camera getNewCamera(const Camera &cam){
 	Using types in "hw2_types.h" and functions in "hw2_math_ops.cpp" will speed you up while working.
 */
 void forwardRenderingPipeline(Camera cam) {
-    Camera newCam = getNewCamera(cam);
+    double M_l2w[3][4];  
+    getM_l2w(cam, M_l2w);
+
+    
 }
 
 
