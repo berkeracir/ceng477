@@ -157,7 +157,18 @@ int main(int argc, char **argv) {
 void viewport_transformation(double result[4][4], Camera cam) {;}
 void perspective_transformation(double result[4][4], Camera cam) {;}
 void camera_transformation(double result[4][4], Camera cam) {;}
-void translate(double M_translate[4][4], Translation t) {;}
+void translate(double M_translate[4][4], Translation t) {
+    double translate_matrix[4][4] = {
+        {1, 0, 0, t.tx},
+        {0, 1, 0, t.ty},
+        {0, 0, 1, t.tz},
+        {0, 0, 0, 1}
+    };
+
+    for (int i=0; i<4; i++)
+        for (int j=0; j<4; j++)
+            M_translate[i][j] = translate_matrix[i][j];
+}
 void scale(double M_scale[4][4], Scaling s) {;}
 void rotate(double M_rotate[4][4], Rotation r) {;}
 void model_transformation(double M_model[4][4], int model_id) {;}
