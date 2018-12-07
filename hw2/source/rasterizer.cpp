@@ -170,6 +170,10 @@ int main(int argc, char **argv) {
 // Helper Function Definitions
 void multiply_M34WithVec4d(double r[3], double m[3][4], double v[4]);
 void assign_matrix(double lhs[4][4], double rhs[4][4]);
+Color addColor(Color c1, Color c2);
+Color subtractColor(Color c1, Color c2);
+Color multiplyColorWithScalar(Color c, double s);
+int pixelRound(double c);
 
 void viewport_transformation(double result[3][4], Camera cam) {
     double assing[3][4] = {
@@ -354,24 +358,125 @@ Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], 
 
 void draw_line(Vec3 a, Vec3 b) {
     double m = atan2(b.y-a.y, b.x-a.x);
-    printf("m: %f\n", m);
-    if (m >= 0) {
-        int y = (int) a.y;
-        double d = (a.y - b.y) + 0.5 * (b.x - a.x);
-        Color c = colors[a.colorId];
-        //Color dc = ()/()
-        for (int x = (int) a.x; x <= (int) b.x; x++) {
-            printf("%d %d\n", x, y);
+
+    if (m >= 0 && m <= M_PI_4) {
+        int x0 = (int) round(a.x);
+        int y0 = (int) round(a.y);
+        int x1 = (int) round(b.x);
+        int y1 = (int) round(b.y);
+
+        int y = y0;
+        int d = 2 * (y0 - y1) + (x1 - x0);
+
+        Color c0 = colors[a.colorId];
+        Color c1 = colors[b.colorId];
+
+        Color c = c0;
+        Color dc = multiplyColorWithScalar(subtractColor(c1, c0), 1.0 / (x1 - x0));
+
+        for (int x=x0; x <= x1; x++) {
             image[x][y] = c;
 
             if (d < 0) {
                 y += 1;
-                d += (a.y - b.y) + (b.x - a.x);
+                d += 2 * ((y0 - y1) + (x1 - x0));
             }
             else {
-                d += (a.y - b.y);
+                d += 2 * (y0 - y1);
             }
+
+            c = addColor(c, dc);
         }
+    }
+    else if (m > M_PI_4 && m <= M_PI_2) {
+        int x0 = (int) round(a.x);
+        int y0 = (int) round(a.y);
+        int x1 = (int) round(b.x);
+        int y1 = (int) round(b.y);
+
+        int x = x0;
+        int d = 2 * (x1 - x0) + (y0 - y1);
+
+        Color c0 = colors[a.colorId];
+        Color c1 = colors[b.colorId];
+
+        Color c = c0;
+        Color dc = multiplyColorWithScalar(subtractColor(c1, c0), 1.0 / (y1 - y0));
+
+        for (int y=y0; y <= y1; y++) {
+            image[x][y] = c;
+
+            if (d > 0) {
+                x += 1;
+                d += 2 * ((x1 - x0) + (y0 - y1));
+            }
+            else {
+                d += 2 * (x1 - x0);
+            }
+
+            c = addColor(c, dc);
+        }
+    }
+    else if (m > M_PI_2 && m < 3 * M_PI_4) {
+        int x0 = (int) round(a.x);
+        int y0 = (int) round(a.y);
+        int x1 = (int) round(b.x);
+        int y1 = (int) round(b.y);
+
+        int x = x0;
+        int d = 2 * (x1 - x0) - (y0 - y1);
+
+        Color c0 = colors[a.colorId];
+        Color c1 = colors[b.colorId];
+
+        Color c = c0;
+        Color dc = multiplyColorWithScalar(subtractColor(c1, c0), 1.0 / (y1 - y0));
+
+        for (int y=y0; y <= y1; y++) {
+            image[x][y] = c;
+
+            if (d < 0) {
+                x -= 1;
+                d += 2 * ((x1 - x0) - (y0 - y1));
+            }
+            else {
+                d += 2 * (x1 - x0);
+            }
+
+            c = addColor(c, dc);
+        }
+    }
+    else if (m >= 3 * M_PI_4 && m < M_PI) {
+        int x0 = (int) round(a.x);
+        int y0 = (int) round(a.y);
+        int x1 = (int) round(b.x);
+        int y1 = (int) round(b.y);
+
+        int y = y0;
+        int d = -2 * (y0 - y1) + (x1 - x0);
+
+        Color c0 = colors[a.colorId];
+        Color c1 = colors[b.colorId];
+
+        Color c = c0;
+        Color dc = multiplyColorWithScalar(subtractColor(c1, c0), 1.0 / (x0 - x1));
+
+        for (int x=x0; x >= x1; x--) {
+            image[x][y] = c;
+
+            if (d > 0) {
+                y += 1;
+                d -= 2 * ((y0 - y1) - (x1 - x0));
+            }
+            else {
+                d -= 2 * (y0 - y1);
+            }
+
+            c = addColor(c, dc);
+        }
+    }
+    else {
+        draw_line(b, a);
     }
 }
 
@@ -402,4 +507,23 @@ void assign_matrix(double lhs[4][4], double rhs[4][4]){
             lhs[i][j] = rhs[i][j];
         }
     }
+}
+
+Color addColor(Color c1, Color c2) {
+    Color result = {c1.r + c2.r, c1.g + c2.g, c1.b + c2.b};
+    return result;
+}
+
+Color subtractColor(Color c1, Color c2) {
+    Color result = {c1.r - c2.r, c1.g - c2.g, c1.b - c2.b};
+    return result;
+}
+
+Color multiplyColorWithScalar(Color c, double s) {
+    Color result = {s * c.r, s * c.g, s * c.b};
+    return result;
+}
+
+int pixelRound(double c) {
+
 }
