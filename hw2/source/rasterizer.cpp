@@ -89,20 +89,29 @@ void forwardRenderingPipeline(Camera cam) {
             int vertex_id_1 = model.triangles[j].vertexIds[1];
             int vertex_id_2 = model.triangles[j].vertexIds[2];
 
-            /*world_vertices[vertex_id_0] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_0]);
-            world_vertices[vertex_id_1] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_1]);
-            world_vertices[vertex_id_2] = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_2]);*/
             Vec3 v_1 = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_0]);
             Vec3 v_2 = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_1]);
             Vec3 v_3 = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_2]);
 
-            if (model.type && !is_backfaced(v_1, v_2, v_3)) { // Model Type is Solid and the triangle is not backfaced.
-                draw_triangle(v_1, v_2, v_3);
+            if (backfaceCullingSetting) { // Backface Culling is enabled.
+                if (model.type && !is_backfaced(v_1, v_2, v_3)) { // Model Type is Solid and the triangle is not backfaced.
+                    draw_triangle(v_1, v_2, v_3);
+                }
+                else if (model.type == 0) { // Wireframe
+                    draw_line(v_1, v_2);
+                    draw_line(v_2, v_3);
+                    draw_line(v_3, v_1);
+                }
             }
-            else {  // Wireframe
-                draw_line(v_1, v_2);
-                draw_line(v_2, v_3);
-                draw_line(v_3, v_1);
+            else { // Backface Culling is disabled
+                if (model.type) { // Solid
+                    draw_triangle(v_1, v_2, v_3);
+                }
+                else if (model.type == 0) {  // Wireframe
+                    draw_line(v_1, v_2);
+                    draw_line(v_2, v_3);
+                    draw_line(v_3, v_1);
+                }
             }
         }
     }
