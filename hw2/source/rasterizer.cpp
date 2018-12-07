@@ -60,8 +60,8 @@ void rotate(double M_rotate[4][4], Rotation r);
 void model_transformation(double M_model[4][4], Model const &model);
 Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], double M_model[4][4], Vec3 v);
 
-void draw(Vec3 v_1, Vec3 v_2, Vec3 v_3, int model_type);
-
+void draw_line(Vec3 a, Vec3 b);
+void draw_triangle(Vec3 v_1, Vec3 v_2, Vec3 v_3);
 
 /*
 	Transformations, culling, rasterization are done here.
@@ -96,7 +96,14 @@ void forwardRenderingPipeline(Camera cam) {
             Vec3 v_3 = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_2]);
 
             // TODO: check BACKFACE CULLING!
-            draw(v_1, v_2, v_3, model.type);
+            if (model.type) { // Solid
+                draw_triangle(v_1, v_2, v_3);
+            }
+            else {  // Wireframe
+                draw_line(v_1, v_2);
+                draw_line(v_2, v_3);
+                draw_line(v_3, v_1);
+            }
         }
     }
 }
@@ -163,8 +170,6 @@ int main(int argc, char **argv) {
 // Helper Function Definitions
 void multiply_M34WithVec4d(double r[3], double m[3][4], double v[4]);
 void assign_matrix(double lhs[4][4], double rhs[4][4]);
-void draw_line(Vec3 a, Vec3 b);
-void draw_triangle(Vec3 v_1, Vec3 v_2, Vec3 v_3);
 
 void viewport_transformation(double result[3][4], Camera cam) {
     double assing[3][4] = {
@@ -347,42 +352,6 @@ Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], 
     return result_vec;
 }
 
-void draw(Vec3 v_1, Vec3 v_2, Vec3 v_3, int model_type) {
-    if (model_type) { // Solid
-        draw_triangle(v_1, v_2, v_3);
-    }
-    else {  // Wireframe
-        draw_line(v_1, v_2);
-        draw_line(v_2, v_3);
-        draw_line(v_3, v_1);
-    }
-}
-
-// Helper Functions
-// ================
-// Multiply matrices -> m[3][4] * v[4][1] = r[3][1]
-void multiply_M34WithVec4d(double r[3], double m[3][4], double v[4]) {
-    int i, j;
-    double total;
-
-    for (i = 0; i < 3; i++) {
-        total = 0;
-        for (j = 0; j < 4; j++) {
-            total += m[i][j] * v[j];
-        }
-
-        r[i] = total;
-    }
-}
-
-void assign_matrix(double lhs[4][4], double rhs[4][4]){
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            lhs[i][j] = rhs[i][j];
-        }
-    }
-}
-
 void draw_line(Vec3 a, Vec3 b) {
     double m = atan2(b.y-a.y, b.x-a.x);
     printf("m: %f\n", m);
@@ -408,4 +377,29 @@ void draw_line(Vec3 a, Vec3 b) {
 
 void draw_triangle(Vec3 v_1, Vec3 v_2, Vec3 v_3) {
     ;
+}
+
+// Helper Functions
+// ================
+// Multiply matrices -> m[3][4] * v[4][1] = r[3][1]
+void multiply_M34WithVec4d(double r[3], double m[3][4], double v[4]) {
+    int i, j;
+    double total;
+
+    for (i = 0; i < 3; i++) {
+        total = 0;
+        for (j = 0; j < 4; j++) {
+            total += m[i][j] * v[j];
+        }
+
+        r[i] = total;
+    }
+}
+
+void assign_matrix(double lhs[4][4], double rhs[4][4]){
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            lhs[i][j] = rhs[i][j];
+        }
+    }
 }
