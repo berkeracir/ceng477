@@ -386,7 +386,7 @@ void draw_triangle(Vec3 v_1, Vec3 v_2, Vec3 v_3) {
     Color c1, c2, c3, c;
     double denom_alpha = v_1.x * (v_2.y - v_3.y) + v_1.y * (v_3.x - v_2.x) + v_2.x * v_3.y - v_2.y * v_3.x;
     double denom_beta = v_2.x * (v_3.y - v_1.y) + v_2.y * (v_1.x - v_3.x) + v_3.x * v_1.y - v_3.y * v_1.x;
-    double denom_gama = v_3.x * (v_1.y - v_2.y) + v_3.x * (v_2.x - v_1.x) + v_1.x * v_2.y - v_1.y * v_2.x;
+    double denom_gama = v_3.x * (v_1.y - v_2.y) + v_3.y * (v_2.x - v_1.x) + v_1.x * v_2.y - v_1.y * v_2.x;
     for (int y = min_y; y <= max_y; y++) {
         for (int x = min_x; x <= max_x; x++) {
             alpha = x * (v_2.y - v_3.y) + y * (v_3.x - v_2.x) + v_2.x * v_3.y - v_2.y * v_3.x;
