@@ -160,7 +160,7 @@ int main(int argc, char **argv) {
         // Converts PPM image in given path to PNG file, by calling ImageMagick's 'convert' command.
         // Notice that os_type is not given as 1 (Ubuntu) or 2 (Windows), below call doesn't do conversion.
         // Change os_type to 1 or 2, after being sure that you have ImageMagick installed.
-        convertPPMToPNG(cameras[i].outputFileName, 1);
+        //convertPPMToPNG(cameras[i].outputFileName, 1);
     }
 
     return 0;
@@ -376,7 +376,37 @@ void draw_line(Vec3 a, Vec3 b) {
 }
 
 void draw_triangle(Vec3 v_1, Vec3 v_2, Vec3 v_3) {
-    ;
+    int min_x = (int) std::min(v_1.x, std::min(v_2.x, v_3.x));
+    int min_y = (int) std::min(v_1.y, std::min(v_2.y, v_3.y));
+    int max_x = (int) std::max(v_1.x, std::max(v_2.x, v_3.x));
+    int max_y = (int) std::max(v_1.y, std::max(v_2.y, v_3.y));
+    double alpha;
+    double beta;
+    double gama;
+    Color c1, c2, c3, c;
+    double denom_alpha = v_1.x * (v_2.y - v_3.y) + v_1.y * (v_3.x - v_2.x) + v_2.x * v_3.y - v_2.y * v_3.x;
+    double denom_beta = v_2.x * (v_3.y - v_1.y) + v_2.y * (v_1.x - v_3.x) + v_3.x * v_1.y - v_3.y * v_1.x;
+    double denom_gama = v_3.x * (v_1.y - v_2.y) + v_3.x * (v_2.x - v_1.x) + v_1.x * v_2.y - v_1.y * v_2.x;
+    for (int y = min_y; y <= max_y; y++) {
+        for (int x = min_x; x <= max_x; x++) {
+            alpha = x * (v_2.y - v_3.y) + y * (v_3.x - v_2.x) + v_2.x * v_3.y - v_2.y * v_3.x;
+            beta = x * (v_3.y - v_1.y) + y * (v_1.x - v_3.x) + v_3.x * v_1.y - v_3.y * v_1.x;
+            gama = x * (v_1.y - v_2.y) + y * (v_2.x - v_1.x) + v_1.x * v_2.y - v_1.y * v_2.x;
+            alpha /= denom_alpha;
+            beta /= denom_beta;
+            gama /= denom_gama;
+            if (alpha >= 0 && beta >= 0 && gama >= 0) {
+                c1 = colors[v_1.colorId];
+                c2 = colors[v_2.colorId];
+                c3 = colors[v_3.colorId];
+                c.b = alpha * c1.b + beta * c2.b + gama * c3.b;
+                c.r = alpha * c1.r + beta * c2.r + gama * c3.r;
+                c.g = alpha * c1.g + beta * c2.g + gama * c3.g;
+                image[x][y] = c;
+            }
+        }
+    }
+
 }
 
 // Helper Functions
