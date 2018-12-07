@@ -60,6 +60,7 @@ void rotate(double M_rotate[4][4], Rotation r);
 void model_transformation(double M_model[4][4], Model const &model);
 Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], double M_model[4][4], Vec3 v);
 
+bool is_backfaced(Vec3 v_1, Vec3 v_2, Vec3 v_3);
 void draw_line(Vec3 a, Vec3 b);
 void draw_triangle(Vec3 v_1, Vec3 v_2, Vec3 v_3);
 
@@ -95,8 +96,7 @@ void forwardRenderingPipeline(Camera cam) {
             Vec3 v_2 = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_1]);
             Vec3 v_3 = transform_point(M_vp, M_per, M_cam, M_model, vertices[vertex_id_2]);
 
-            // TODO: check BACKFACE CULLING!
-            if (model.type) { // Solid
+            if (model.type && !is_backfaced(v_1, v_2, v_3)) { // Model Type is Solid and the triangle is not backfaced.
                 draw_triangle(v_1, v_2, v_3);
             }
             else {  // Wireframe
@@ -164,7 +164,6 @@ int main(int argc, char **argv) {
     }
 
     return 0;
-
 }
 
 // Helper Function Definitions
@@ -354,6 +353,15 @@ Vec3 transform_point(double M_vp[3][4], double M_per[4][4], double M_cam[4][4], 
     result_vec.colorId = v.colorId;
 
     return result_vec;
+}
+
+bool is_backfaced(Vec3 v_1, Vec3 v_2, Vec3 v_3) {
+    Vec3 normal = crossProductVec3(subtractVec3(v_2,v_1),subtractVec3(v_3,v_1));
+
+    if (dotProductVec3(normal, v_1) > 0)
+        return true;
+    else
+        return false;
 }
 
 void draw_line(Vec3 a, Vec3 b) {
