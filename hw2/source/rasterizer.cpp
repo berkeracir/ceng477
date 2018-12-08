@@ -182,6 +182,8 @@ Color addColor(Color c1, Color c2);
 Color subtractColor(Color c1, Color c2);
 Color multiplyColorWithScalar(Color c, double s);
 int pixelRound(double c);
+double min(double a, double b);
+double max(double a, double b);
 
 void viewport_transformation(double result[3][4], Camera cam) {
     double assing[3][4] = {
@@ -497,30 +499,30 @@ void draw_line(Vec3 a, Vec3 b) {
     }
 }
 
-void draw_triangle(Vec3 v_1, Vec3 v_2, Vec3 v_3) {
-    int min_x = (int) std::min(v_1.x, std::min(v_2.x, v_3.x));
-    int min_y = (int) std::min(v_1.y, std::min(v_2.y, v_3.y));
-    int max_x = (int) std::max(v_1.x, std::max(v_2.x, v_3.x));
-    int max_y = (int) std::max(v_1.y, std::max(v_2.y, v_3.y));
+void draw_triangle(Vec3 v_0, Vec3 v_1, Vec3 v_2) {
+    int min_x = (int) round(min(v_0.x, min(v_1.x, v_2.x)));
+    int min_y = (int) round(min(v_0.y, min(v_1.y, v_2.y)));
+    int max_x = (int) round(max(v_0.x, max(v_1.x, v_2.x)));
+    int max_y = (int) round(max(v_0.y, max(v_1.y, v_2.y)));
     double alpha;
     double beta;
     double gama;
     Color c1, c2, c3, c;
-    double denom_alpha = v_1.x * (v_2.y - v_3.y) + v_1.y * (v_3.x - v_2.x) + v_2.x * v_3.y - v_2.y * v_3.x;
-    double denom_beta = v_2.x * (v_3.y - v_1.y) + v_2.y * (v_1.x - v_3.x) + v_3.x * v_1.y - v_3.y * v_1.x;
-    double denom_gama = v_3.x * (v_1.y - v_2.y) + v_3.y * (v_2.x - v_1.x) + v_1.x * v_2.y - v_1.y * v_2.x;
-    for (int y = min_y; y <= max_y; y++) {
-        for (int x = min_x; x <= max_x; x++) {
-            alpha = x * (v_2.y - v_3.y) + y * (v_3.x - v_2.x) + v_2.x * v_3.y - v_2.y * v_3.x;
-            beta = x * (v_3.y - v_1.y) + y * (v_1.x - v_3.x) + v_3.x * v_1.y - v_3.y * v_1.x;
-            gama = x * (v_1.y - v_2.y) + y * (v_2.x - v_1.x) + v_1.x * v_2.y - v_1.y * v_2.x;
+    double denom_alpha = v_0.x * (v_1.y - v_2.y) + v_0.y * (v_2.x - v_1.x) + v_1.x * v_2.y - v_1.y * v_2.x;
+    double denom_beta = v_1.x * (v_2.y - v_0.y) + v_1.y * (v_0.x - v_2.x) + v_2.x * v_0.y - v_2.y * v_0.x;
+    double denom_gama = v_2.x * (v_0.y - v_1.y) + v_2.y * (v_1.x - v_0.x) + v_0.x * v_1.y - v_0.y * v_1.x;
+    for (int x = min_x; x <= max_x; x++) {
+        for (int y = min_y; y <= max_y; y++) {
+            alpha = x * (v_1.y - v_2.y) + y * (v_2.x - v_1.x) + v_1.x * v_2.y - v_1.y * v_2.x;
+            beta = x * (v_2.y - v_0.y) + y * (v_0.x - v_2.x) + v_2.x * v_0.y - v_2.y * v_0.x;
+            gama = x * (v_0.y - v_1.y) + y * (v_1.x - v_0.x) + v_0.x * v_1.y - v_0.y * v_1.x;
             alpha /= denom_alpha;
             beta /= denom_beta;
             gama /= denom_gama;
             if (alpha >= 0 && beta >= 0 && gama >= 0) {
-                c1 = colors[v_1.colorId];
-                c2 = colors[v_2.colorId];
-                c3 = colors[v_3.colorId];
+                c1 = colors[v_0.colorId];
+                c2 = colors[v_1.colorId];
+                c3 = colors[v_2.colorId];
                 c.b = alpha * c1.b + beta * c2.b + gama * c3.b;
                 c.r = alpha * c1.r + beta * c2.r + gama * c3.r;
                 c.g = alpha * c1.g + beta * c2.g + gama * c3.g;
@@ -573,4 +575,18 @@ Color multiplyColorWithScalar(Color c, double s) {
 
 int pixelRound(double c) {
 
+}
+
+double min(double a, double b){
+    if(a <= b){
+        return a;
+    }
+    return b;
+}
+
+double max(double a, double b){
+    if(a <= b){
+        return b;
+    }
+    return a;
 }
