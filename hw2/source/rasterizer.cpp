@@ -47,7 +47,6 @@ void initializeImage(Camera cam) {
             image[i][j].r = backgroundColor.r;
             image[i][j].g = backgroundColor.g;
             image[i][j].b = backgroundColor.b;
-
         }
 }
 
@@ -181,7 +180,6 @@ void assign_matrix(double lhs[4][4], double rhs[4][4]);
 Color addColor(Color c1, Color c2);
 Color subtractColor(Color c1, Color c2);
 Color multiplyColorWithScalar(Color c, double s);
-int pixelRound(double c);
 
 void viewport_transformation(double result[3][4], Camera cam) {
     double assing[3][4] = {
@@ -498,37 +496,44 @@ void draw_line(Vec3 a, Vec3 b) {
 }
 
 void draw_triangle(Vec3 v_1, Vec3 v_2, Vec3 v_3) {
-    int min_x = (int) std::min(v_1.x, std::min(v_2.x, v_3.x));
-    int min_y = (int) std::min(v_1.y, std::min(v_2.y, v_3.y));
-    int max_x = (int) std::max(v_1.x, std::max(v_2.x, v_3.x));
-    int max_y = (int) std::max(v_1.y, std::max(v_2.y, v_3.y));
+    int min_x = (int) round(std::min(v_1.x, std::min(v_2.x, v_3.x)));
+    int min_y = (int) round(std::min(v_1.y, std::min(v_2.y, v_3.y)));
+    int max_x = (int) round(std::max(v_1.x, std::max(v_2.x, v_3.x)));
+    int max_y = (int) round(std::max(v_1.y, std::max(v_2.y, v_3.y)));
+
     double alpha;
     double beta;
-    double gama;
-    Color c1, c2, c3, c;
+    double gamma;
+    
     double denom_alpha = v_1.x * (v_2.y - v_3.y) + v_1.y * (v_3.x - v_2.x) + v_2.x * v_3.y - v_2.y * v_3.x;
-    double denom_beta = v_2.x * (v_3.y - v_1.y) + v_2.y * (v_1.x - v_3.x) + v_3.x * v_1.y - v_3.y * v_1.x;
-    double denom_gama = v_3.x * (v_1.y - v_2.y) + v_3.y * (v_2.x - v_1.x) + v_1.x * v_2.y - v_1.y * v_2.x;
+    double denom_beta  = v_2.x * (v_3.y - v_1.y) + v_2.y * (v_1.x - v_3.x) + v_3.x * v_1.y - v_3.y * v_1.x;
+    double denom_gamma = v_3.x * (v_1.y - v_2.y) + v_3.y * (v_2.x - v_1.x) + v_1.x * v_2.y - v_1.y * v_2.x;
+
+    Color c1, c2, c3, c;
+
     for (int y = min_y; y <= max_y; y++) {
         for (int x = min_x; x <= max_x; x++) {
             alpha = x * (v_2.y - v_3.y) + y * (v_3.x - v_2.x) + v_2.x * v_3.y - v_2.y * v_3.x;
-            beta = x * (v_3.y - v_1.y) + y * (v_1.x - v_3.x) + v_3.x * v_1.y - v_3.y * v_1.x;
-            gama = x * (v_1.y - v_2.y) + y * (v_2.x - v_1.x) + v_1.x * v_2.y - v_1.y * v_2.x;
+            beta  = x * (v_3.y - v_1.y) + y * (v_1.x - v_3.x) + v_3.x * v_1.y - v_3.y * v_1.x;
+            gamma = x * (v_1.y - v_2.y) + y * (v_2.x - v_1.x) + v_1.x * v_2.y - v_1.y * v_2.x;
+
             alpha /= denom_alpha;
-            beta /= denom_beta;
-            gama /= denom_gama;
-            if (alpha >= 0 && beta >= 0 && gama >= 0) {
+            beta  /= denom_beta;
+            gamma /= denom_gamma;
+
+            if (alpha >= 0 && beta >= 0 && gamma >= 0) {
                 c1 = colors[v_1.colorId];
                 c2 = colors[v_2.colorId];
                 c3 = colors[v_3.colorId];
-                c.b = alpha * c1.b + beta * c2.b + gama * c3.b;
-                c.r = alpha * c1.r + beta * c2.r + gama * c3.r;
-                c.g = alpha * c1.g + beta * c2.g + gama * c3.g;
+
+                c.b = alpha * c1.b + beta * c2.b + gamma * c3.b;
+                c.r = alpha * c1.r + beta * c2.r + gamma * c3.r;
+                c.g = alpha * c1.g + beta * c2.g + gamma * c3.g;
+
                 image[x][y] = c;
             }
         }
     }
-
 }
 
 // Helper Functions
@@ -569,8 +574,4 @@ Color subtractColor(Color c1, Color c2) {
 Color multiplyColorWithScalar(Color c, double s) {
     Color result = {s * c.r, s * c.g, s * c.b};
     return result;
-}
-
-int pixelRound(double c) {
-
 }
