@@ -3,3 +3,4 @@ all:
 
 clean:
 	rm main main.o
+
