@@ -17,6 +17,12 @@ static void errorCallback(int error,
   fprintf(stderr, "Error: %s\n", description);
 }
 
+static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, true);
+  }
+}
+
 int main(int argc, char * argv[]) {
 
   if (argc != 2) {
@@ -40,6 +46,9 @@ int main(int argc, char * argv[]) {
     glfwTerminate();
     exit(-1);
   }
+
+  glfwSetKeyCallback(win, keyCallback);
+
   glfwMakeContextCurrent(win);
 
   GLenum err = glewInit();
@@ -55,6 +64,7 @@ int main(int argc, char * argv[]) {
   initTexture(argv[1], & widthTexture, & heightTexture);
 
   while (!glfwWindowShouldClose(win)) {
+    glfwWaitEvents();
     glfwSwapBuffers(win);
     glfwPollEvents();
   }
