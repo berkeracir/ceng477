@@ -29,8 +29,8 @@ void main()
 
     // compute toLight vector vertex coordinate in VCS
    
-   // set gl_Position variable correctly to give the transformed vertex position
+    // set gl_Position variable correctly to give the transformed vertex position
 
-   gl_Position = vec4(0,0,0,0); // this is a placeholder. It does not correctly set the position 
+    gl_Position = vec4(0,0,0,0); // this is a placeholder. It does not correctly set the position
     
 }
