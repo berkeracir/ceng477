@@ -13,14 +13,10 @@ uniform mat4 viewingMatrix;
 uniform mat4 modelingMatrix;
 uniform vec3 eye;
 
-//in vec3 vPos;
-//in vec2 vTexCoord;
-
 // Texture-related data
 uniform sampler2D rgbTexture;
 uniform int widthTexture;
 uniform int heightTexture;
-
 
 // Output to Fragment Shader
 out vec2 textureCoordinate; // For texture-color
@@ -28,9 +24,13 @@ out vec3 vertexNormal; // For Lighting computation
 out vec3 ToLightVector; // Vector from Vertex to Light;
 out vec3 ToCameraVector; // Vector from Vertex to Camera;
 
+void main() {
+    textureCoordinate = vec2(1-float(position.x)/widthTexture, 1-float(position.z)/heightTexture);
 
-void main()
-{
+    vec4 texture_color = texture(rgbTexture, textureCoordinate);
+    
+    vec3 pWorld = position;
+    pWorld.y = heightFactor * (0.2126*texture_color.x + 0.7152*texture_color.y + 0.0722*texture_color.z);
 
     // get texture value, compute height
     // compute normal vector using also the heights of neighbor vertices
@@ -44,6 +44,6 @@ void main()
 
     //vec4 pWorld = modelingMatrix * vec4(position, 1);
 
-    gl_Position = projectionMatrix * viewingMatrix * modelingMatrix * vec4(position, 1.0f);
+    gl_Position = projectionMatrix * viewingMatrix * modelingMatrix * vec4(pWorld, 1.0f);
 
 }

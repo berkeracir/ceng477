@@ -7,6 +7,11 @@ uniform mat4 MVP; // ModelViewProjection Matrix
 uniform mat4 MV; // ModelView idMVPMatrix
 uniform vec4 cameraPosition;
 
+uniform mat4 projectionMatrix;
+uniform mat4 viewingMatrix;
+uniform mat4 modelingMatrix;
+uniform vec3 eye;
+
 // Texture-related data;
 uniform sampler2D rgbTexture;
 uniform int widthTexture;
@@ -42,5 +47,5 @@ void main() {
 
   // compute the color using the following equation
   //color = vec4(clamp( textureColor.xyz * vec3(ambient + diffuse + specular), 0.0, 1.0), 1.0);
-  color = vec4(1.0f, 1.0f, 1.0f, 1.0f); 
+  color = vec4(textureColor.xyz, 1.0); 
 }

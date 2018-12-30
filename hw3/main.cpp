@@ -4,7 +4,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp> 
 #include <glm/ext.hpp>
-#include "linmath.h"
 
 using namespace std;
 
@@ -30,6 +29,8 @@ unsigned int triangle_count;
 GLuint vertexBuffer;
 
 glm::vec3 eye, gaze, up;
+float fovy, ratio, near, far;
+float heightFactor;
 
 float *triangle_data;
 
@@ -58,24 +59,7 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
   }
 }
 
-void initData() {
-  eye = glm::vec3(widthTexture/2, widthTexture/10, -widthTexture/4);
-  gaze = glm::vec3(0.0f, 0.0f, 1.0f);
-  up = glm::vec3(0.0f, 1.0f, 0.0f);
-
-  /*unsigned int *indexes = new unsigned int[triangle_count*3];
-  unsigned int indexes_size = triangle_count*3*sizeof(unsigned int);
-  unsigned int i = 0;
-  for (int z=0; z < heightTexture; z++) {
-    for (int x=0; x < widthTexture; x++) {
-      indexes[i++] = x + z*(widthTexture+1);
-      indexes[i++] = (x+1) + (z+1)*(widthTexture+1);
-      indexes[i++] = x + (z+1)*(widthTexture+1);
-      indexes[i++] = x + z*(widthTexture+1);
-      indexes[i++] = (x+1) + z*(widthTexture+1);
-      indexes[i++] = (x+1) + (z+1)*(widthTexture+1);
-    }
-  }*/
+void initData() {  
   unsigned long data_size = triangle_count*3*3*sizeof(float);
   unsigned int data_index = 0;
   for (int z=0; z < heightTexture; z++) {
@@ -151,28 +135,42 @@ int main(int argc, char * argv[]) {
   initShaders();
   glUseProgram(idProgramShader);
   initTexture(argv[1], & widthTexture, & heightTexture);
+
   triangle_count = 2*widthTexture*heightTexture;
   triangle_data = new float[triangle_count*9];
   initData();
+
+  eye = glm::vec3(widthTexture/2, widthTexture/10, -widthTexture/4);
+  gaze = glm::vec3(0.0f, 0.0f, 1.0f);
+  up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+  fovy = 45.0f;
+  ratio = 1.0f;
+  near = 0.1f;
+  far = 10000.0f;
+
+  heightFactor = 10.0f;
 
   projectionMatrixLoc = glGetUniformLocation(idProgramShader, "projectionMatrix");
   viewingMatrixLoc = glGetUniformLocation(idProgramShader, "viewingMatrix");
   modelingMatrixLoc = glGetUniformLocation(idProgramShader, "modelingMatrix");
   eyeLoc = glGetUniformLocation(idProgramShader, "eye");
-  //vpos_location = glGetAttribLocation(idProgramShader, "vPos");
 
-  //glEnableVertexAttribArray(vpos_location);
-  //glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, (void *) 0);
+  GLint samplerLoc = glGetUniformLocation(idProgramShader, "rgbTexture");
+  glUniform1i(samplerLoc, 0);
+
+  GLint widthTextureLoc = glGetUniformLocation(idProgramShader, "widthTexture");
+  glUniform1i(widthTextureLoc, widthTexture);
+  GLint heightTextureLoc = glGetUniformLocation(idProgramShader, "heightTexture");
+  glUniform1i(heightTextureLoc, heightTexture);
+
+  GLint heightFactorLoc = glGetUniformLocation(idProgramShader, "heightFactor");
+
   glEnable(GL_DEPTH_TEST);
 
   while (!glfwWindowShouldClose(win)) {
-    float ratio;
     int width, height;
-    mat4x4 m, p, v, mvp;
-
     glfwGetFramebufferSize(win, &width, &height);
-    ratio = width / (float) height;
-
     glViewport(0, 0, width, height);
 
     glClearColor(0, 0, 0, 1);
@@ -180,21 +178,18 @@ int main(int argc, char * argv[]) {
     glClearStencil(0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    glm::mat4 projectionMatrix = glm::perspective(45.0f, 1.0f, 0.1f, 1000.0f);
-    GLdouble n = 0.1f;
+    glm::mat4 projectionMatrix = glm::perspective(fovy, ratio, near, far);
 
-    glm::vec3 cameraUp = glm::vec3(0, 1, 0);
-    glm::vec3 cameraGaze = glm::vec3(0, 0, 1);
-    glm::vec3 cameraPosition = glm::vec3(widthTexture / 2, widthTexture / 10, (-1) * (widthTexture / 4));
-    glm::vec3 center = glm::vec3(widthTexture / 2, widthTexture / 10, (-1) * (widthTexture / 4) + 0.1);
-
-    glm::mat4 viewMatrix = glm::lookAt(cameraPosition, center, cameraUp);
+    glm::vec3 center = eye + gaze * near;
+    glm::mat4 viewMatrix = glm::lookAt(eye, center, up);
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
 
-    glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
-    glUniformMatrix4fv(viewingMatrixLoc, 1, GL_FALSE, &viewMatrix[0][0]);
-    glUniformMatrix4fv(modelingMatrixLoc, 1, GL_FALSE, &modelMatrix[0][0]);
+    glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+    glUniformMatrix4fv(viewingMatrixLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+    glUniformMatrix4fv(modelingMatrixLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+    glUniform1f(heightFactorLoc, heightFactor);
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, 0, 0);
