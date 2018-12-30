@@ -31,6 +31,8 @@ GLuint vertexBuffer;
 
 glm::vec3 eye, gaze, up;
 
+float *triangle_data;
+
 static void errorCallback(int error,
   const char * description) {
   fprintf(stderr, "Error: %s\n", description);
@@ -57,11 +59,9 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 }
 
 void initData() {
-  eye = glm::vec3(widthTexture/2, widthTexture/10, heightTexture/2);
-  gaze = glm::vec3(0.0f, -1.0f, 0.0f);
-  up = glm::vec3(0.0f, 0.0f, 1.0f);
-
-  triangle_count = 2*widthTexture*heightTexture;
+  eye = glm::vec3(widthTexture/2, widthTexture/10, -widthTexture/4);
+  gaze = glm::vec3(0.0f, 0.0f, 1.0f);
+  up = glm::vec3(0.0f, 1.0f, 0.0f);
 
   /*unsigned int *indexes = new unsigned int[triangle_count*3];
   unsigned int indexes_size = triangle_count*3*sizeof(unsigned int);
@@ -76,35 +76,33 @@ void initData() {
       indexes[i++] = (x+1) + (z+1)*(widthTexture+1);
     }
   }*/
-
-  float *triangle_data = new float[triangle_count*3*3];
   unsigned long data_size = triangle_count*3*3*sizeof(float);
   unsigned int data_index = 0;
   for (int z=0; z < heightTexture; z++) {
     for (int x=0; x < widthTexture; x++) {
-      triangle_data[data_index++] = (float) x*2.0/widthTexture-1;
-      triangle_data[data_index++] = (float) z*2.0/heightTexture-1;
+      triangle_data[data_index++] = (float) x;
       triangle_data[data_index++] = (float) 0;
-
-      triangle_data[data_index++] = (float) (x+1)*2.0/widthTexture-1;
-      triangle_data[data_index++] = (float) (z+1)*2.0/heightTexture-1;
-      triangle_data[data_index++] = (float) 0;
-
-      triangle_data[data_index++] = (float) x*2.0/widthTexture-1;
-      triangle_data[data_index++] = (float) (z+1)*2.0/heightTexture-1;
-      triangle_data[data_index++] = (float) 0;
-
-      triangle_data[data_index++] = (float) x*2.0/widthTexture-1;
       triangle_data[data_index++] = (float) z;
-      triangle_data[data_index++] = (float) 0;
 
-      triangle_data[data_index++] = (float) (x+1)*2.0/widthTexture-1;
-      triangle_data[data_index++] = (float) z*2.0/heightTexture-1;
+      triangle_data[data_index++] = (float) (x+1);
       triangle_data[data_index++] = (float) 0;
+      triangle_data[data_index++] = (float) (z+1);
 
-      triangle_data[data_index++] = (float) (x+1)*2.0/widthTexture-1;
-      triangle_data[data_index++] = (float) (z+1)*2.0/heightTexture-1;
+      triangle_data[data_index++] = (float) x;
       triangle_data[data_index++] = (float) 0;
+      triangle_data[data_index++] = (float) (z+1);
+
+      triangle_data[data_index++] = (float) x;
+      triangle_data[data_index++] = (float) 0;
+      triangle_data[data_index++] = (float) z;
+
+      triangle_data[data_index++] = (float) (x+1);
+      triangle_data[data_index++] = (float) 0;
+      triangle_data[data_index++] = (float) z;
+
+      triangle_data[data_index++] = (float) (x+1);
+      triangle_data[data_index++] = (float) 0;
+      triangle_data[data_index++] = (float) (z+1);
     }
   }
 
@@ -153,16 +151,19 @@ int main(int argc, char * argv[]) {
   initShaders();
   glUseProgram(idProgramShader);
   initTexture(argv[1], & widthTexture, & heightTexture);
+  triangle_count = 2*widthTexture*heightTexture;
+  triangle_data = new float[triangle_count*9];
   initData();
 
   projectionMatrixLoc = glGetUniformLocation(idProgramShader, "projectionMatrix");
   viewingMatrixLoc = glGetUniformLocation(idProgramShader, "viewingMatrix");
   modelingMatrixLoc = glGetUniformLocation(idProgramShader, "modelingMatrix");
   eyeLoc = glGetUniformLocation(idProgramShader, "eye");
-  vpos_location = glGetAttribLocation(idProgramShader, "vPos");
+  //vpos_location = glGetAttribLocation(idProgramShader, "vPos");
 
-  glEnableVertexAttribArray(vpos_location);
-  glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, (void *) 0);
+  //glEnableVertexAttribArray(vpos_location);
+  //glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, (void *) 0);
+  glEnable(GL_DEPTH_TEST);
 
   while (!glfwWindowShouldClose(win)) {
     float ratio;
@@ -179,23 +180,26 @@ int main(int argc, char * argv[]) {
     glClearStencil(0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    mat4x4_identity(m);
+    glm::mat4 projectionMatrix = glm::perspective(45.0f, 1.0f, 0.1f, 1000.0f);
+    GLdouble n = 0.1f;
 
-    float fovy = (float) (45.0/180.0) * M_PI;
-    //mat4x4_perspective(p, fovy, 1.0f, 0.1f, 1000.0f);
-    mat4x4_ortho(p, -2.f, 2.f, -0.5f, 1.5f, 30.f, -30.f);
+    glm::vec3 cameraUp = glm::vec3(0, 1, 0);
+    glm::vec3 cameraGaze = glm::vec3(0, 0, 1);
+    glm::vec3 cameraPosition = glm::vec3(widthTexture / 2, widthTexture / 10, (-1) * (widthTexture / 4));
+    glm::vec3 center = glm::vec3(widthTexture / 2, widthTexture / 10, (-1) * (widthTexture / 4) + 0.1);
 
-    float e[3] = {widthTexture/2, 100, heightTexture/2};
-    float c[3] = {widthTexture/2, 0, heightTexture/2};
-    float u[3] = {0, 0, 1};
-    //mat4x4_look_at(v, e, c, u);
-    mat4x4_identity(v);
+    glm::mat4 viewMatrix = glm::lookAt(cameraPosition, center, cameraUp);
 
-    glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, (const GLfloat*) p);
-    glUniformMatrix4fv(viewingMatrixLoc, 1, GL_FALSE, (const GLfloat*) v);
-    glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, (const GLfloat*) p);
+    glm::mat4 modelMatrix = glm::mat4(1.0f);
 
+    glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, &projectionMatrix[0][0]);
+    glUniformMatrix4fv(viewingMatrixLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+    glUniformMatrix4fv(modelingMatrixLoc, 1, GL_FALSE, &modelMatrix[0][0]);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, 0);
     glDrawArrays(GL_TRIANGLES, 0, triangle_count);
+    glDisableClientState(GL_VERTEX_ARRAY);
 
     glfwSwapBuffers(win);
     glfwPollEvents();
