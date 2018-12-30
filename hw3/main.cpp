@@ -14,6 +14,10 @@ int widthTexture, heightTexture;
 int prevWinWidth, prevWinHeight, prevWinXpos, prevWinYpos;
 bool fullscreen = false;
 
+GLuint VAO;
+GLuint vertex_buffer;
+GLuint index_buffer;
+
 static void errorCallback(int error,
   const char * description) {
   fprintf(stderr, "Error: %s\n", description);
@@ -37,6 +41,34 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
   else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
+}
+
+void initData() {
+  unsigned int indexes[] = {
+    0, 1, 2
+  };
+
+  float data[] = {
+    0.0f,0.8f,
+    -0.8f, 0.0f,
+    0.8f,0.0f
+  };
+
+  glGenVertexArrays(1, &VAO);
+  glBindVertexArray(VAO);
+
+  glGenBuffers(1, &vertex_buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+
+  glGenBuffers(1, &index_buffer);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_STATIC_DRAW);
+
+  glEnableVertexAttribArray(0);
+
+  glVertexAttribPointer(0,2,GL_FLOAT, GL_FALSE,0,0);
+  glBindVertexArray(0);
 }
 
 int main(int argc, char * argv[]) {
@@ -73,11 +105,21 @@ int main(int argc, char * argv[]) {
     exit(-1);
   }
 
+  initData();
   initShaders();
-  glUseProgram(idProgramShader);
+
   initTexture(argv[1], & widthTexture, & heightTexture);
 
   while (!glfwWindowShouldClose(win)) {
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glUseProgram(idProgramShader);
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+
     glfwSwapBuffers(win);
     glfwPollEvents();
   }
