@@ -11,10 +11,32 @@ GLuint idJpegTexture;
 GLuint idMVPMatrix;
 
 int widthTexture, heightTexture;
+int prevWinWidth, prevWinHeight, prevWinXpos, prevWinYpos;
+bool fullscreen = false;
 
 static void errorCallback(int error,
   const char * description) {
   fprintf(stderr, "Error: %s\n", description);
+}
+
+static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
+  if (key == GLFW_KEY_F && action == GLFW_PRESS) {
+    if (!fullscreen) {
+      fullscreen = true;
+      glfwGetWindowSize(window, &prevWinWidth, &prevWinHeight);
+      glfwGetWindowPos(window, &prevWinXpos, &prevWinYpos);
+      GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+      const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+      glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+    }
+    else {
+      fullscreen = false;
+      glfwSetWindowMonitor(window, NULL, prevWinXpos, prevWinYpos, prevWinWidth, prevWinHeight, 0);
+    }
+  }
+  else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, GLFW_TRUE);
+  }
 }
 
 int main(int argc, char * argv[]) {
@@ -41,6 +63,7 @@ int main(int argc, char * argv[]) {
     exit(-1);
   }
   glfwMakeContextCurrent(win);
+  glfwSetKeyCallback(win, key_callback);
 
   GLenum err = glewInit();
   if (err != GLEW_OK) {
