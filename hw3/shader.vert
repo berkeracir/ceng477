@@ -1,12 +1,20 @@
 #version 410
 
-layout(location = 0) in vec3 position;
+//layout(location = 0) in vec3 position;
 
 // Data from CPU 
 uniform mat4 MVP; // ModelViewProjection Matrix
 uniform mat4 MV; // ModelView idMVPMatrix
 uniform vec4 cameraPosition;
 uniform float heightFactor;
+
+uniform mat4 projectionMatrix;
+uniform mat4 viewingMatrix;
+uniform mat4 modelingMatrix;
+uniform vec3 eye;
+
+in vec3 vPos;
+in vec2 vTexCoord;
 
 // Texture-related data
 uniform sampler2D rgbTexture;
@@ -32,6 +40,10 @@ void main()
     // set gl_Position variable correctly to give the transformed vertex position
 
     //gl_Position = vec4(0,0,0,0); // this is a placeholder. It does not correctly set the position
-    gl_Position = vec4(position, 1.0f);
+    //gl_Position = vec4(position, 1.0f);
+
+    //vec4 pWorld = modelingMatrix * vec4(position, 1);
+
+    gl_Position = projectionMatrix * viewingMatrix * modelingMatrix * vec4(vPos, 1.0f);
 
 }
