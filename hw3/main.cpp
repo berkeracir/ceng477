@@ -30,7 +30,13 @@ GLuint vertexBuffer;
 
 glm::vec3 eye, gaze, up;
 float fovy, ratio, near, far;
-float heightFactor;
+float heightFactor, delta_heightFactor = 0.25f;
+float yaw, pitch, roll, delta_angle = 1.0 * M_PI/180;
+float speed, delta_speed = 0.1f;
+
+glm::mat4 yaw_positive_rotation_matrix, yaw_negative_rotation_matrix;
+glm::mat4 pitch_positive_rotation_matrix, pitch_negative_rotation_matrix;
+glm::mat4 roll_positive_rotation_matrix, roll_negative_rotation_matrix;
 
 float *triangle_data;
 
@@ -48,14 +54,52 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
       GLFWmonitor *monitor = glfwGetPrimaryMonitor();
       const GLFWvidmode *mode = glfwGetVideoMode(monitor);
       glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
     }
     else {
       fullscreen = false;
       glfwSetWindowMonitor(window, NULL, prevWinXpos, prevWinYpos, prevWinWidth, prevWinHeight, 0);
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
   }
   else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
+  }
+  else if (key == GLFW_KEY_O && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    heightFactor += delta_heightFactor;
+  }
+  else if (key == GLFW_KEY_L && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+      heightFactor -= delta_heightFactor;
+  }
+  else if (key == GLFW_KEY_U && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    speed += delta_speed;
+  }
+  else if (key == GLFW_KEY_J && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    speed -= delta_speed;
+  }
+  else if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    gaze = glm::vec3(yaw_positive_rotation_matrix * glm::vec4(gaze, 1.0f));
+    up = glm::vec3(yaw_positive_rotation_matrix * glm::vec4(up, 1.0f));
+  }
+  else if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    gaze = glm::vec3(yaw_negative_rotation_matrix * glm::vec4(gaze, 1.0f));
+    up = glm::vec3(yaw_negative_rotation_matrix * glm::vec4(up, 1.0f));
+  }
+  else if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    gaze = glm::vec3(pitch_negative_rotation_matrix * glm::vec4(gaze, 1.0f));
+    up = glm::vec3(pitch_negative_rotation_matrix * glm::vec4(up, 1.0f));
+  }
+  else if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    gaze = glm::vec3(pitch_positive_rotation_matrix * glm::vec4(gaze, 1.0f));
+    up = glm::vec3(pitch_positive_rotation_matrix * glm::vec4(up, 1.0f));
+  }
+  else if (key == GLFW_KEY_Q && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    gaze = glm::vec3(roll_positive_rotation_matrix * glm::vec4(gaze, 1.0f));
+    up = glm::vec3(roll_positive_rotation_matrix * glm::vec4(up, 1.0f));
+  }
+  else if (key == GLFW_KEY_E && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    gaze = glm::vec3(roll_negative_rotation_matrix * glm::vec4(gaze, 1.0f));
+    up = glm::vec3(roll_negative_rotation_matrix * glm::vec4(up, 1.0f));
   }
 }
 
@@ -150,6 +194,18 @@ int main(int argc, char * argv[]) {
   far = 10000.0f;
 
   heightFactor = 10.0f;
+  yaw = 0.0f;
+  pitch = 0.0f;
+  roll = 0.0f;
+  speed = 0.0f;
+
+  glm::mat4 identity_matrix = glm::mat4(1.0f);
+  yaw_positive_rotation_matrix = glm::rotate(identity_matrix, delta_angle, glm::vec3(0.0f, 1.0f, 0.0f));
+  yaw_negative_rotation_matrix = glm::rotate(identity_matrix, -delta_angle, glm::vec3(0.0f, 1.0f, 0.0f));
+  pitch_positive_rotation_matrix = glm::rotate(identity_matrix, delta_angle, glm::vec3(1.0f, 0.0f, 0.0f));
+  pitch_negative_rotation_matrix = glm::rotate(identity_matrix, -delta_angle, glm::vec3(1.0f, 0.0f, 0.0f));
+  roll_positive_rotation_matrix = glm::rotate(identity_matrix, delta_angle, glm::vec3(0.0f, 0.0f, 1.0f));;
+  roll_negative_rotation_matrix = glm::rotate(identity_matrix, -delta_angle, glm::vec3(0.0f, 0.0f, 1.0f));;
 
   projectionMatrixLoc = glGetUniformLocation(idProgramShader, "projectionMatrix");
   viewingMatrixLoc = glGetUniformLocation(idProgramShader, "viewingMatrix");
@@ -178,6 +234,8 @@ int main(int argc, char * argv[]) {
     glClearStencil(0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+    eye += speed * gaze;
+
     glm::mat4 projectionMatrix = glm::perspective(fovy, ratio, near, far);
 
     glm::vec3 center = eye + gaze * near;
@@ -193,7 +251,7 @@ int main(int argc, char * argv[]) {
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(3, GL_FLOAT, 0, 0);
-    glDrawArrays(GL_TRIANGLES, 0, triangle_count);
+    glDrawArrays(GL_TRIANGLES, 0, triangle_count*9);
     glDisableClientState(GL_VERTEX_ARRAY);
 
     glfwSwapBuffers(win);
