@@ -19,6 +19,7 @@ GLuint idMVPMatrix;
 GLuint projectionMatrixLoc;
 GLuint viewingMatrixLoc;
 GLuint modelingMatrixLoc;
+GLuint normalMatrixLoc;
 GLuint eyeLoc;
 
 int widthTexture, heightTexture;
@@ -210,6 +211,7 @@ int main(int argc, char * argv[]) {
   projectionMatrixLoc = glGetUniformLocation(idProgramShader, "projectionMatrix");
   viewingMatrixLoc = glGetUniformLocation(idProgramShader, "viewingMatrix");
   modelingMatrixLoc = glGetUniformLocation(idProgramShader, "modelingMatrix");
+  normalMatrixLoc = glGetUniformLocation(idProgramShader, "normalMatrix");
   eyeLoc = glGetUniformLocation(idProgramShader, "eye");
 
   GLint samplerLoc = glGetUniformLocation(idProgramShader, "rgbTexture");
@@ -243,9 +245,12 @@ int main(int argc, char * argv[]) {
 
     glm::mat4 modelMatrix = glm::mat4(1.0f);
 
+    glm::mat4 normalMatrix = glm::inverseTranspose(viewMatrix * modelMatrix);
+
     glUniformMatrix4fv(projectionMatrixLoc, 1, GL_FALSE, glm::value_ptr(projectionMatrix));
     glUniformMatrix4fv(viewingMatrixLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
     glUniformMatrix4fv(modelingMatrixLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+    glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 
     glUniform1f(heightFactorLoc, heightFactor);
 
