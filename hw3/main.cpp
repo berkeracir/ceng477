@@ -226,6 +226,14 @@ int main(int argc, char * argv[]) {
 
   glEnable(GL_DEPTH_TEST);
 
+  cout << "Press 'F' to toggle between Fullscreen and Window Mode\n"
+       << "Controls:\n"
+       << "\t'O'-'L' for Height Factor\n"
+       << "\t'U'-'J' for Speed\n"
+       << "\t'W'-'S' for Pitch\n"
+       << "\t'A'-'D' for Yaw\n"
+       << "\t'Q'-'E' for Roll\n";
+
   while (!glfwWindowShouldClose(win)) {
     int width, height;
     glfwGetFramebufferSize(win, &width, &height);
